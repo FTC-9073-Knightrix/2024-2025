@@ -19,7 +19,7 @@ public class mecDrive extends OpMode {
     public static final double driveSpeed = 0.66;
     public static final double fastSpeed = 1.0;
     public static final double slowSpeed = 0.25;
-    public static double finalSlowmode = 0.0;
+    public static double finalSlowMode = 0.0;
     public static boolean slowMode = true;
     public static int gyroAdj = 0;
 
@@ -92,14 +92,14 @@ public class mecDrive extends OpMode {
         //Setting boolean hold
         if(gamepad1.right_bumper) {
             //Slowmode
-            finalSlowmode = slowSpeed;
+            finalSlowMode = slowSpeed;
 
         } else if (gamepad1.left_bumper) {
             //Fastmode
-            finalSlowmode = fastSpeed;
+            finalSlowMode = fastSpeed;
         } else {
             //Regular
-            finalSlowmode = driveSpeed;
+            finalSlowMode = driveSpeed;
         }
 
         if (gamepad1.y){
@@ -107,6 +107,6 @@ public class mecDrive extends OpMode {
         }
 
         orientation = imu.getRobotYawPitchRollAngles();
-        mecanumDrive.driveFieldCentric(gamepad1.left_stick_x * finalSlowmode, -gamepad1.left_stick_y * finalSlowmode, gamepad1.right_stick_x * finalSlowmode, orientation.getYaw(AngleUnit.DEGREES));
+        mecanumDrive.driveFieldCentric(gamepad1.left_stick_x * finalSlowMode, -gamepad1.left_stick_y * finalSlowMode, gamepad1.right_stick_x * finalSlowMode, orientation.getYaw(AngleUnit.DEGREES));
     }
 }
