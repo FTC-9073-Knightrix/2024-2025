@@ -15,11 +15,19 @@ public class ArmAndServo extends OpMode {
     double outtakePower = 0.0;
     double armServoRot = 1.0;
     double basketRot = 0.0;
+
+    int liftPosHoriz = 0;
+    int liftPosAdjHoriz = 0;
+    int liftPosVert = 0;
+    int liftPosAdjVert = 0;
+    double vertLinearPower = 0;
+    double horizLinearPower = 0;
     boolean clickedX = false;
     boolean claw = false;
     double clawRot = 0.0;
 
-    TouchSensor slideLimit; //slideLimit.isPressed(), assume encoder position is 8000
+    TouchSensor vertSlideLimit; //slideLimit.isPressed(), assume encoder position is 8000
+    TouchSensor horizSlideLimit;
 
     //Automated time variables
     double current1 = Double.MAX_VALUE;
@@ -35,18 +43,22 @@ public class ArmAndServo extends OpMode {
     public Servo clawServo;
     public Servo basketServo;
 
+
     @Override
     public void init() {
         telemetry.addData("Initialization","Starting...");
         telemetry.addData("Initialization","Done!");
 
-        vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Motor Port 0
-        horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Motor Port 1
+        vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Motor Port 1
+        horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Motor Port 2
 
         armServo = hardwareMap.servo.get("rotateServo"); // Servo Port 0
         clawServo = hardwareMap.servo.get("clawServo"); // Servo Port 1
         basketServo = hardwareMap.servo.get("basketServo"); // Servo Port 2
         outtakeServo = hardwareMap.crservo.get("outtakeServo"); // Servo Port 3
+
+        vertSlideLimit = hardwareMap.touchSensor.get("vertSlideLimit");
+        horizSlideLimit = hardwareMap.touchSensor.get("horizSlideLimit");
 
         vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -104,15 +116,36 @@ public class ArmAndServo extends OpMode {
             clawRot = 1.0;
         }
 
-        // Stop Linear Overextension & Over-retraction
-//        if (vertLinearMotor.getCurrentPosition() >= 1.0) {
-//
-//        }
+        // Stop overextension and over retraction of vert linear motor
+        liftPosVert = vertLinearMotor.getCurrentPosition() - liftPosAdjVert;
+
+        if (vertSlideLimit.isPressed() || gamepad2.right_bumper) {
+            liftPosAdjVert = vertLinearMotor.getCurrentPosition();
+        }
+
+        if (gamepad2.right_stick_y > 0 && !vertSlideLimit.isPressed()) {
+            vertLinearPower = gamepad2.right_stick_y;
+        } else if (gamepad2.right_stick_y < 0.0 && liftPosVert < 8000) {
+            vertLinearPower = gamepad2.right_stick_y;
+        } else { vertLinearPower = 0.0;}
+
+        // Stop overextension and over retraction of horizontal linear motor
+        liftPosHoriz = horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz;
+
+        if (horizSlideLimit.isPressed() || gamepad2.left_bumper) {
+            liftPosAdjHoriz = horizLinearMotor.getCurrentPosition();
+        }
+
+        if (gamepad2.left_stick_y > 0 && !horizSlideLimit.isPressed()) {
+            horizLinearPower = gamepad2.left_stick_y;
+        } else if (gamepad2.left_stick_y < 0.0 && liftPosHoriz < 8000) {
+            horizLinearPower = gamepad2.left_stick_y;
+        } else { horizLinearPower = 0.0;}
 
         outtakeServo.setPower(outtakePower);
 
-        vertLinearMotor.setPower(gamepad2.right_stick_y);
-        horizLinearMotor.setPower(gamepad2.left_stick_y);
+        vertLinearMotor.setPower(vertLinearPower);
+        horizLinearMotor.setPower(horizLinearPower);
 
         clawServo.setPosition(clawRot);
         armServo.setPosition(armServoRot);
