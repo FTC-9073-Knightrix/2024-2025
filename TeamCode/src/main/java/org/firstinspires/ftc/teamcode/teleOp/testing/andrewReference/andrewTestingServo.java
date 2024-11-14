@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleOp.testing;
-
-import static org.firstinspires.ftc.teamcode.teleOp.mecDrive.*;
+package org.firstinspires.ftc.teamcode.teleOp.testing.andrewReference;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
