@@ -65,32 +65,6 @@ public abstract class AutoMethods extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
 
-    public void driveForward(double distance, double power) {
-        double timeToTravel = distance / (power * 3);
-        mecanumDrive.driveRobotCentric(0, power, 0);
-        runtime.reset();
-        while (opModeIsActive() && runtime.seconds() < timeToTravel) {
-        }
-        mecanumDrive.stop();
-    }
-
-
-    public void driveBackward(double distance, double power) {
-        driveForward(-distance, -power);
-    }
-
-    public void strafeRight(double distance, double power) {
-        double timeToTravel = distance / (power * 3);
-        mecanumDrive.driveRobotCentric(power, 0, 0);
-        runtime.reset();
-        while (opModeIsActive() && runtime.seconds() < timeToTravel) {
-        }
-        mecanumDrive.stop();
-    }
-
-    public void strafeLeft(double distance, double power) {
-        strafeRight(-distance, -power);  // Reverse the direction
-    }
 
 
     public void VertliftArm(int liftHeight, double liftSpeed, double timeInSeconds) {
@@ -99,7 +73,7 @@ public abstract class AutoMethods extends LinearOpMode {
         vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
         vertLinearMotor.setPower(liftSpeed);
-        while (vertLinearMotor.isBusy() && opModeIsActive()) {
+        while(vertLinearMotor.isBusy() && opModeIsActive()) {
             vertLinearMotor.setPower(liftSpeed);
         }
         vertLinearMotor.setPower(0);
