@@ -34,11 +34,10 @@ public class ArmAndServo extends OpMode {
     double current2 = Double.MAX_VALUE;
     double current3 = Double.MAX_VALUE;
     double current4 = Double.MAX_VALUE;
-//    public DcMotor outtakeMotor; Switched to a servo
+    DcMotor outtakeMotor; //Switched to a servo
     public DcMotor vertLinearMotor;
     public DcMotor horizLinearMotor;
 
-    public CRServo outtakeServo; // Goes -1 to 1
     public Servo armServo;
     public Servo clawServo;
     public Servo basketServo;
@@ -49,16 +48,16 @@ public class ArmAndServo extends OpMode {
         telemetry.addData("Initialization","Starting...");
         telemetry.addData("Initialization","Done!");
 
+        outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Motor Port 0
         vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Motor Port 1
         horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Motor Port 2
 
-        armServo = hardwareMap.servo.get("rotateServo"); // Servo Port 0
+        armServo = hardwareMap.servo.get("armServo"); // Servo Port 0
         clawServo = hardwareMap.servo.get("clawServo"); // Servo Port 1
         basketServo = hardwareMap.servo.get("basketServo"); // Servo Port 2
-        outtakeServo = hardwareMap.crservo.get("outtakeServo"); // Servo Port 3
 
-        vertSlideLimit = hardwareMap.touchSensor.get("vertSlideLimit");
-        horizSlideLimit = hardwareMap.touchSensor.get("horizSlideLimit");
+        vertSlideLimit = hardwareMap.touchSensor.get("vertSlideLimit"); // Digital 0
+        horizSlideLimit = hardwareMap.touchSensor.get("horizSlideLimit"); // Digital 1
 
         vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
@@ -82,7 +81,7 @@ public class ArmAndServo extends OpMode {
             if (getRuntime() > current1 + .75){
                 // After .75 seconds from press -> Start outtake motor and shoot block out
                 current2 = getRuntime();
-                outtakePower = 1.0;
+                outtakePower = -1.0;
                 current1 = Double.MAX_VALUE;
             }
 
@@ -95,7 +94,7 @@ public class ArmAndServo extends OpMode {
             }
         }
         else {
-            outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger);
+            outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
         }
 
         // Basket Drop Servo System
@@ -142,7 +141,7 @@ public class ArmAndServo extends OpMode {
             horizLinearPower = gamepad2.left_stick_y;
         } else { horizLinearPower = 0.0;}
 
-        outtakeServo.setPower(outtakePower);
+        outtakeMotor.setPower(outtakePower);
 
         vertLinearMotor.setPower(vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
