@@ -7,8 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-// TODO Change outtake motor to a continuous servo
-// TODO Prevent overextension and underextension of linearSlides
+// TODO Prevent overextension and under-extension of linearSlides
 @TeleOp(name="ArmAndServo")
 public class ArmAndServo extends OpMode {
 
