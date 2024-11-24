@@ -34,7 +34,7 @@ public class ArmAndServo extends OpMode {
     double current2 = Double.MAX_VALUE;
     double current3 = Double.MAX_VALUE;
     double current4 = Double.MAX_VALUE;
-    DcMotor outtakeMotor; //Switched to a servo
+    public DcMotor outtakeMotor;
     public DcMotor vertLinearMotor;
     public DcMotor horizLinearMotor;
 
