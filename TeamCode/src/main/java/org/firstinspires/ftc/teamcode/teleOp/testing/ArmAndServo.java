@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class ArmAndServo extends OpMode {
 
     //Servo variables
-    double armRot = 0.5; // start the arm halfway
+    double armRot = 0.6; // start the arm halfway
     double basketRot = 0.0;
     double latchRot = 1.0;
     double clawRot = 0.0;
@@ -25,8 +25,12 @@ public class ArmAndServo extends OpMode {
     double vertLinearPower = 0.0;
     double horizLinearPower = 0.0;
     double outtakePower = 0.0;
+    double hangerPower = 0.0;
 
     boolean clickedX = false;
+    boolean clickedA = false;
+    boolean armInDefault = true;
+    boolean startHanging = false;
 
     //Automated time variables
     double current1 = Double.MAX_VALUE;
@@ -34,11 +38,13 @@ public class ArmAndServo extends OpMode {
     double current3 = Double.MAX_VALUE;
     double current4 = Double.MAX_VALUE;
     double current5 = Double.MAX_VALUE;
+    double current6 = Double.MAX_VALUE;
 
     // electronics
     public DcMotor outtakeMotor;
     public DcMotor vertLinearMotor;
     public DcMotor horizLinearMotor;
+    public DcMotor hangerMotor;
 
     public Servo armServo;
     public Servo clawServo;
@@ -47,6 +53,8 @@ public class ArmAndServo extends OpMode {
 
     public TouchSensor vertSlideSensor; //slideLimit.isPressed(), assume encoder position is 8000
     public TouchSensor horizSlideSensor;
+    public TouchSensor hangerSensor1;
+    public TouchSensor hangerSensor2;
 
 
     @Override
@@ -56,6 +64,7 @@ public class ArmAndServo extends OpMode {
         outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Motor Port 0
         vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Motor Port 1
         horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Motor Port 2
+        hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Motor Port 3
 
         armServo = hardwareMap.servo.get("armServo"); // Servo Port 0
         clawServo = hardwareMap.servo.get("clawServo"); // Servo Port 1
@@ -73,14 +82,14 @@ public class ArmAndServo extends OpMode {
     @Override
     public void loop() {
         // ---------------------------------------INTAKE OUTTAKE SYSTEM ---------------------------------------
-        if (gamepad2.x){
-            clickedX = true;
+        if (gamepad2.a){
+            clickedA = true;
         }
 
-        if (clickedX) {
+        if (clickedA) {
             // outtakeServo (-1 is intake, 1 is outtake)
             // armServo (0 is up, 1 is down)
-            if (gamepad2.x) {
+            if (gamepad2.a) {
                 // Gamepad 1 x pressed -> Stop outtake motor and pull servo up
                 outtakePower = 0.0;
                 current1 = getRuntime();
@@ -97,25 +106,36 @@ public class ArmAndServo extends OpMode {
             if (getRuntime() > current2 + 0.75) {
                 // After 2.0 seconds from press -> Stop outtake motor and pull servo down to halfway, then close the latch
                 outtakePower = 0.0;
-                armRot = 0.5;
+                armRot = 0.7;
                 latchRot = 0.0; // close latch
                 current2 = Double.MAX_VALUE;
-                clickedX = false;
+                clickedA = false;
             }
         }
         else {
             outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
 
-            // Moving arm with dpad
-            if (gamepad2.dpad_down){
-                armRot += 0.005;
+            if (gamepad2.x) {
+                clickedX = true;
             }
-            if (gamepad2.dpad_up){
-                armRot -= 0.005;
-            }
+            if (clickedX) {
+                if (gamepad2.x) {
+                    current6 = getRuntime();
+                    if (armInDefault) {
+                        armRot = 0.03;
+                    } else {
+                        armRot = 0.6;
+                    }
 
-            if (gamepad2.a) {
-                armRot = 0.5;
+                }
+                if (getRuntime() > current6 + 0.5) {
+                    armInDefault = !armInDefault;
+                    current6 = Double.MAX_VALUE;
+                    clickedX = false;
+                }
+            } else {
+                // Moving arm with dpad
+                armRot = armRot + ((gamepad2.dpad_up ? 1 : 0) + (gamepad2.dpad_down ? -1 : 0)) * 0.005;
             }
         }
 
@@ -180,6 +200,22 @@ public class ArmAndServo extends OpMode {
             horizLinearPower = gamepad2.left_stick_y;
         } else { horizLinearPower = 0.0;}
 
+        // --------------------------------------- LINEAR SLIDES ---------------------------------------
+        //Only allow hanger to move if not at the extrema, and the limits are not touched.
+        if (gamepad1.dpad_up){
+            startHanging = true;
+        }
+        if (gamepad1.dpad_down){
+            startHanging = false;
+            if (!hangerSensor1.isPressed()){
+                hangerMotor.setPower(-1.0);
+            }
+        }
+
+        if (startHanging && !hangerSensor2.isPressed()) {hangerMotor.setPower(1.0); }
+        else if (gamepad1.dpad_down && !hangerSensor1.isPressed()) { hangerMotor.setPower(-1.0); }
+        else { hangerMotor.setPower(0); }
+
         outtakeMotor.setPower(outtakePower);
 
         vertLinearMotor.setPower(vertLinearPower);
@@ -204,5 +240,6 @@ public class ArmAndServo extends OpMode {
         telemetry.addData("g2RStickY, g2LStickY", gamepad2.right_stick_y + ", " + gamepad2.left_stick_y);
         telemetry.addData("Vertical, Horizontal", liftPosVert + ", " + horizLinearMotor.getCurrentPosition());
         telemetry.update();
+
     }
 }
