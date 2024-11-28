@@ -142,7 +142,146 @@ public abstract class AutoMethods extends LinearOpMode {
         }
     }
 
-    public class VertLift {
+    public class IntakeMotor {
+        private DcMotorEx intakeMotor;
+
+        public IntakeMotor(HardwareMap hardwareMap) {
+            intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
+            intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // Adjust if needed
+        }
+
+
+        public class IntakeIn implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Running Forward");
+                return false;
+            }
+        }
+
+        public Action intakeIn() {
+            return new IntakeIn();
+        }
+
+        // Action to outtake (move the motor backward)
+        public class IntakeOut implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(-1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Running Backward");
+                return false;
+            }
+        }
+
+        public Action intakeOut() {
+            return new IntakeOut();
+        }
+
+        public class IntakeStop implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(0);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Stopped");
+                return true;
+            }
+        }
+
+        public Action intakeStop() {
+            return new IntakeStop();
+        }
+    }
+
+    public class OuttakeMotor {
+        private DcMotorEx outtakeMotor;
+
+        public OuttakeMotor(HardwareMap hardwareMap) {
+            outtakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
+            outtakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            outtakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+
+        public class OuttakeIn implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    outtakeMotor.setPower(1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Outtake Motor", "Running Forward");
+                return false;
+            }
+        }
+
+        public Action outtakeIn() {
+            return new OuttakeIn();
+        }
+
+        public class OuttakeOut implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    outtakeMotor.setPower(-1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Outtake Motor", "Running Backward");
+                return false;
+            }
+        }
+
+        public Action outtakeOut() {
+            return new OuttakeOut();
+        }
+
+
+        public class OuttakeStop implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    outtakeMotor.setPower(0);
+                    initialized = true;
+                }
+
+                telemetry.addData("Outtake Motor", "Stopped");
+                return true;
+            }
+        }
+
+        public Action outtakeStop() {
+            return new OuttakeStop();
+        }
+    }
+
+
+
+    public class VertLift {  // for vertical life
         private DcMotorEx vertLift;
 
         public VertLift(HardwareMap hardwareMap) {
@@ -201,13 +340,62 @@ public abstract class AutoMethods extends LinearOpMode {
         }
     }
 
-    public class HorizLinearMotor {
-        private DcMotorEx horizLinearMotor;
+    public class HorizLift {  // code for the horizontal life
+        private DcMotorEx HorizLift;
 
-        public HorizLinearMotor(HardwareMap hardwareMap) {
-            horizLinearMotor = hardwareMap.get(DcMotorEx.class, "horizLinearMotor");
-            horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            horizLinearMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        public HorizLift(HardwareMap hardwareMap) {
+            HorizLift = hardwareMap.get(DcMotorEx.class, "vertLiftMotor");
+            HorizLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            HorizLift.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
+
+        public class HorizLiftUp implements Action {  // lift up initilized false
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    HorizLift.setPower(1);
+                    initialized = true;
+                }
+
+                double pos = HorizLift.getCurrentPosition();
+                telemetry.addData("Vertical Position: ", pos);
+                if (pos < 3000.0) { //TODO Find true encoder position
+                    return true;
+                } else {
+                    HorizLift.setPower(0);
+                    return false;
+                }
+            }
+        }
+        public Action HorizLiftUp() {
+            return new HorizLift.HorizLiftUp();
+        }
+
+        public class HorizLiftDown implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    HorizLift.setPower(-1);
+                    initialized = true;
+                }
+
+                double pos = HorizLift.getCurrentPosition();
+                telemetry.addData("Horizontal Position: ", pos);
+                if (!horizSlideLimit.isPressed()) {
+                    return true;
+                } else {
+                    HorizLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    HorizLift.setPower(0);
+                    return false;
+                }
+            }
+        }
+        public Action vertLiftDown(){
+            return new HorizLift.HorizLiftDown();
         }
     }
 
