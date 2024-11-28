@@ -61,17 +61,17 @@ public class ArmAndServo extends OpMode {
     public void init() {
         telemetry.addData("Initialization","Starting...");
 
-        outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Motor Port 0
-        vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Motor Port 1
-        horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Motor Port 2
-        hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Motor Port 3
+        outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Expansion Hub Motor Port 0
+        vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Expansion Hub Motor Port 1
+        horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Expansion Hub Motor Port 2
+        hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Expansion Hub Motor Port 3
 
-        armServo = hardwareMap.servo.get("armServo"); // Servo Port 0
-        clawServo = hardwareMap.servo.get("clawServo"); // Servo Port 1
-        basketServo = hardwareMap.servo.get("basketServo"); // Servo Port 2
-        latchServo = hardwareMap.servo.get("latchServo"); // Servo Port 3
+        armServo = hardwareMap.servo.get("armServo"); // Control Hub Servo Port 0
+        clawServo = hardwareMap.servo.get("clawServo"); // Control Hub Servo Port 1
+        basketServo = hardwareMap.servo.get("basketServo"); // Control Hub Servo Port 2
+        latchServo = hardwareMap.servo.get("latchServo"); // Control Hub Servo Port 3
 
-        vertSlideSensor = hardwareMap.touchSensor.get("vertSlideSensor"); // Digital 0
+        vertSlideSensor = hardwareMap.touchSensor.get("vertSlideSensor"); // Expansion Hub Port Digital 0
         horizSlideSensor = hardwareMap.touchSensor.get("horizSlideSensor"); // Digital 1
 
 
