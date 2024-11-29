@@ -281,7 +281,7 @@ public abstract class AutoMethods extends LinearOpMode {
 
 
 
-    public class VertLift {  // for vertical life
+    public class VertLift {  // for vertical lift
         private DcMotorEx vertLift;
 
         public VertLift(HardwareMap hardwareMap) {
