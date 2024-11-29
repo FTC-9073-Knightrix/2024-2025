@@ -58,7 +58,6 @@ public abstract class TeleOpMethods extends OpMode {
 
     double basketDropCurrent1 = Double.MAX_VALUE;
     double basketDropCurrent2 = Double.MAX_VALUE;
-    double current6 = Double.MAX_VALUE;
 
     // Electronics
     public DcMotor outtakeMotor;
@@ -151,13 +150,12 @@ public abstract class TeleOpMethods extends OpMode {
 
     public void intakeOuttakeSystem() {
         // ---------------------------------------INTAKE OUTTAKE SYSTEM ---------------------------------------
-        // TODO PULL THE HORIZONTAL SLIDE BACK AUTOMATICALLY
         if (gamepad2.a){
             clickedA = true;
         }
 
         if (clickedA) {
-            // outtakeServo (-1 is intake, 1 is outtake)
+            // outtakeServo (1 is intake, -1 is outtake)
             // armServo (0 is up, 1 is down)
             if (gamepad2.a) {
                 // Gamepad 1 x pressed -> Stop outtake motor and pull servo up
@@ -167,6 +165,7 @@ public abstract class TeleOpMethods extends OpMode {
                 armRot = 0.0;
             }
 
+            // TODO PULL THE HORIZONTAL SLIDE BACK AUTOMATICALLY
             if (getRuntime() > autoIntakeOuttakeCurrent1 + 1.25) {
                 // After 1.25 seconds from press -> Start outtake motor and shoot block out
                 autoIntakeOuttakeCurrent2 = getRuntime();
@@ -191,28 +190,11 @@ public abstract class TeleOpMethods extends OpMode {
         else {
             outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
 
-            if (gamepad2.x) {
-                clickedX = true;
-            }
-            if (clickedX) {
-                if (gamepad2.x) {
-                    current6 = getRuntime();
-                    if (armInDefault) {
-                        armRot = 0.015;
-                    } else {
-                        armRot = 0.5;
-                    }
-
-                }
-                if (getRuntime() > current6 + 0.5) {
-                    armInDefault = !armInDefault;
-                    current6 = Double.MAX_VALUE;
-                    clickedX = false;
-                }
-            } else {
-                // Moving arm with dpad
-                armRot = armRot + ((gamepad2.dpad_down ? 1 : 0) + (gamepad2.dpad_up ? -1 : 0)) * 0.01;
-            }
+            if (gamepad2.x) armRot = 0.69; // Arm Down
+            if (gamepad2.y) armRot = 0.5; // Arm Default
+            if (gamepad2.b) armRot = 0.0; // Arm at Bucket
+            // Moving arm with dpad
+            armRot = armRot + ((gamepad2.dpad_down ? 1 : 0) + (gamepad2.dpad_up ? -1 : 0)) * 0.01;
         }
     }
 
@@ -231,10 +213,10 @@ public abstract class TeleOpMethods extends OpMode {
             basketDropCurrent1 = Double.MAX_VALUE;
             latchRot = 0.0;
         }
-        if (getRuntime() > basketDropCurrent2 + 1.00) { // After 1 sec - return bucket
-            basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.02;
+        if (getRuntime() > basketDropCurrent2 + 0.25) { // After 0.25 sec - return bucket
+            basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.01;
         }
-        if (getRuntime() > basketDropCurrent2 + 3.00) { // After 2 sec - Max the current after the bucket returns
+        if (getRuntime() > basketDropCurrent2 + 2.25) { // After 2 sec - Max the current after the bucket returns
             basketDropCurrent2 = Double.MAX_VALUE;
         }
 
@@ -305,19 +287,19 @@ public abstract class TeleOpMethods extends OpMode {
         horizLinearMotor.setPower(horizLinearPower);
         hangerMotor.setPower(hangerPower);
 
-        if (clawRot > 1) clawRot = 1;
-        if (clawRot < 0.2) clawRot = 0.2;
-        if (armRot > 1) armRot = 1;
-        if (armRot < 0) armRot = 0;
-        if (basketRot > 1) basketRot = 1;
-        if (basketRot < 0) basketRot = 0;
-        if (latchRot > 1) latchRot = 1;
-        if (latchRot < 0) latchRot = 0;
+//        if (clawRot > 1) clawRot = 1;
+//        if (clawRot < 0.2) clawRot = 0.2;
+//        if (armRot > 1) armRot = 1;
+//        if (armRot < 0) armRot = 0;
+//        if (basketRot > 1) basketRot = 1;
+//        if (basketRot < 0) basketRot = 0;
+//        if (latchRot > 1) latchRot = 1;
+//        if (latchRot < 0) latchRot = 0;
 
-        clawServo.setPosition(clawRot);
-        armServo.setPosition(armRot);
-        basketServo.setPosition(basketRot);
-        latchServo.setPosition(latchRot);
+        clawServo.setPosition(Range.clip(clawRot, 0.2, 1.0));
+        armServo.setPosition(Range.clip(armRot, 0.0, 1.0));
+        basketServo.setPosition(Range.clip(basketRot, 0.0, 1.0));
+        latchServo.setPosition(Range.clip(latchRot,0.0, 1.0));
     }
 
     public void addTelemetryToDriverStation() {
