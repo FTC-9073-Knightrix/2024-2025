@@ -143,7 +143,7 @@ public abstract class TeleOpMethods extends OpMode {
         }
 
         orientation = imu.getRobotYawPitchRollAngles();
-        mecanumDrive.driveFieldCentric(gamepad1.left_stick_x * finalSlowMode,
+        mecanumDrive.driveFieldCentric(-gamepad1.left_stick_x * finalSlowMode,
                                         -gamepad1.left_stick_y * finalSlowMode,
                                         gamepad1.right_stick_x * finalSlowMode,
                                         orientation.getYaw(AngleUnit.DEGREES));
@@ -234,7 +234,7 @@ public abstract class TeleOpMethods extends OpMode {
         if (getRuntime() > basketDropCurrent2 + 1.00) { // After 1 sec - return bucket
             basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.02;
         }
-        if (getRuntime() > basketDropCurrent2 + 3.00) { // After 2 sec - Max the current after the bucket returns
+        if (getRuntime() > basketDropCurrent2 + 2.00) { // After 2 sec - Max the current after the bucket returns
             basketDropCurrent2 = Double.MAX_VALUE;
         }
 
@@ -325,7 +325,7 @@ public abstract class TeleOpMethods extends OpMode {
         telemetry.addData("Clicked X", clickedX);
         telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
         telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
-        telemetry.addData("Horizontal, True", liftPosHoriz + ", " + vertLinearMotor.getCurrentPosition());
+        telemetry.addData("Horizontal, True", liftPosHoriz + ", " + horizLinearMotor.getCurrentPosition());
         telemetry.addData("Gyro: ", "Yaw: " + orientation.getYaw(AngleUnit.DEGREES) + "Roll: " + orientation.getRoll(AngleUnit.DEGREES) + "Pitch: " + orientation.getPitch(AngleUnit.DEGREES));
         telemetry.addData("Slowmode: ", finalSlowMode);
         telemetry.addData("Arm Pos: ", armRot);
