@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.teleOp.testing;
+package org.firstinspires.ftc.teamcode.teleOp;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,10 +14,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-// TODO Prevent overextension and under-extension of linearSlides
-// TODO Make a default position for the Arm to get it out the way of the bucket and off the floor
-@TeleOp(name="ArmAndServo")
-public class ArmAndServo extends OpMode {
+@Config
+public abstract class TeleOpMethods extends OpMode {
     //Drive train speeds
     final double driveSpeed = 0.66;
     final double fastSpeed = 1.0;
@@ -84,7 +82,6 @@ public class ArmAndServo extends OpMode {
     //Create the orientation variable for the robot position
     public YawPitchRollAngles orientation;
 
-
     @Override
     public void init() {
         telemetry.addData("Initialization","Starting...");
@@ -126,8 +123,7 @@ public class ArmAndServo extends OpMode {
         telemetry.addData("Initialization","Done!");
     }
 
-    @Override
-    public void loop() {
+    public void runMecanumDrive() {
         // ---------------------------------------MECANUM DRIVE SYSTEM ---------------------------------------
         //Setting boolean hold
         if(gamepad1.right_bumper) {
@@ -147,8 +143,13 @@ public class ArmAndServo extends OpMode {
         }
 
         orientation = imu.getRobotYawPitchRollAngles();
-        mecanumDrive.driveFieldCentric(gamepad1.left_stick_x * finalSlowMode, -gamepad1.left_stick_y * finalSlowMode, gamepad1.right_stick_x * finalSlowMode, orientation.getYaw(AngleUnit.DEGREES));
+        mecanumDrive.driveFieldCentric(gamepad1.left_stick_x * finalSlowMode,
+                                        -gamepad1.left_stick_y * finalSlowMode,
+                                        gamepad1.right_stick_x * finalSlowMode,
+                                        orientation.getYaw(AngleUnit.DEGREES));
+    }
 
+    public void intakeOuttakeSystem() {
         // ---------------------------------------INTAKE OUTTAKE SYSTEM ---------------------------------------
         // TODO PULL THE HORIZONTAL SLIDE BACK AUTOMATICALLY
         if (gamepad2.a){
@@ -213,7 +214,9 @@ public class ArmAndServo extends OpMode {
                 armRot = armRot + ((gamepad2.dpad_down ? 1 : 0) + (gamepad2.dpad_up ? -1 : 0)) * 0.01;
             }
         }
+    }
 
+    public void basketSystem() {
         // ---------------------------------------BASKET LATCH DROP SYSTEM ---------------------------------------
         // (For both the basket and latch: 1.0 is open, 0.0 is close)
         if (gamepad2.right_bumper) { // Open servo rotate the basket to drop
@@ -238,6 +241,9 @@ public class ArmAndServo extends OpMode {
         if (gamepad2.right_stick_button) {
             basketRot = 0.0;
         }
+    }
+
+    public void clawSystem() {
         // --------------------------------------- CLAW SERVO SYSTEM ---------------------------------------
         // (0.2 is closed, 1.0 is open)
         if (gamepad1.b){
@@ -246,7 +252,9 @@ public class ArmAndServo extends OpMode {
         if (gamepad1.a){
             clawRot = 1.0;
         }
+    }
 
+    public void linearSlidesSystem() {
         // --------------------------------------- LINEAR SLIDES ---------------------------------------
         // Stop overextension and over retraction of vert linear motor
         liftPosVert = -(vertLinearMotor.getCurrentPosition() - liftPosAdjVert);
@@ -263,19 +271,20 @@ public class ArmAndServo extends OpMode {
 
         // Stop overextension and over retraction of horizontal linear motor
         liftPosHoriz = -(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
-
-        if (horizSlideSensor.isPressed() || gamepad2.dpad_left) {  // if slide sensor touched or manual adjustment button pressed
+        // if slide sensor touched or manual adjustment button pressed
+        if (horizSlideSensor.isPressed() || gamepad2.dpad_left) {
             liftPosAdjHoriz = horizLinearMotor.getCurrentPosition();
         }
 
-        if (gamepad2.right_stick_y > 0
-
-        ) {
+        // TODO Set up limits for horizontal linear motor with sensor
+        if (gamepad2.right_stick_y > 0) {
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < 8000) {
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
         } else { horizLinearPower = 0.0;}
+    }
 
+    public void leadScrewSystem() {
         // --------------------------------------- LEAD SCREW ---------------------------------------
         //Only allow hanger to move if not at the extrema, and the limits are not touched.
         if (gamepad1.dpad_up){
@@ -287,11 +296,10 @@ public class ArmAndServo extends OpMode {
                 hangerPower = -1.0;
             }
         }
+    }
 
-        if (startHanging && !hangerSensor2.isPressed()) { hangerPower = 1.0; }
-        else if (gamepad1.dpad_down && !hangerSensor1.isPressed()) { hangerPower = -1.0; }
-        else { hangerPower = 0.0; }
-
+    public void updateAttachments() {
+        // -------------------------- SET MOTOR POWERS AND SERVO POSITIONS --------------------------
         outtakeMotor.setPower(outtakePower);
         vertLinearMotor.setPower(-vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
@@ -310,10 +318,12 @@ public class ArmAndServo extends OpMode {
         armServo.setPosition(armRot);
         basketServo.setPosition(basketRot);
         latchServo.setPosition(latchRot);
+    }
 
+    public void addTelemetryToDriverStation() {
         telemetry.addData("Runtime", getRuntime());
         telemetry.addData("Clicked X", clickedX);
-        telemetry.addData("g2RStickY, g2LStickY", gamepad2.right_stick_y + ", " + gamepad2.left_stick_y);
+        telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
         telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
         telemetry.addData("Horizontal, True", liftPosHoriz + ", " + vertLinearMotor.getCurrentPosition());
         telemetry.addData("Gyro: ", "Yaw: " + orientation.getYaw(AngleUnit.DEGREES) + "Roll: " + orientation.getRoll(AngleUnit.DEGREES) + "Pitch: " + orientation.getPitch(AngleUnit.DEGREES));
