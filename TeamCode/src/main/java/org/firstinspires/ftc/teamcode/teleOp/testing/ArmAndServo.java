@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 // TODO Make a default position for the Arm to get it out the way of the bucket and off the floor
 @TeleOp(name="ArmAndServo")
 public class ArmAndServo extends OpMode {
-    //Drive train sppeds
+    //Drive train speeds
     final double driveSpeed = 0.66;
     final double fastSpeed = 1.0;
     final double slowSpeed = 0.25;
