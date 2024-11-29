@@ -156,6 +156,7 @@ public class ArmAndServo extends OpMode {
             if (gamepad2.a) {
                 // Gamepad 1 x pressed -> Stop outtake motor and pull servo up
                 outtakePower = 0.0;
+                latchRot = 1.0;
                 current1 = getRuntime();
                 armRot = 0.0;
             }
@@ -245,26 +246,28 @@ public class ArmAndServo extends OpMode {
             liftPosAdjVert = vertLinearMotor.getCurrentPosition();
         }
 
-        if (gamepad2.right_stick_y > 0 && !vertSlideSensor.isPressed()) {
-            vertLinearPower = gamepad2.right_stick_y;
-        } else if (gamepad2.right_stick_y < 0.0 && liftPosVert < 8000) {
-            vertLinearPower = gamepad2.right_stick_y;
+        if (gamepad2.left_stick_y > 0 && !vertSlideSensor.isPressed()) {
+            vertLinearPower = -gamepad2.left_stick_y;
+        } else if (gamepad2.left_stick_y < 0 && liftPosVert < 10000) {
+            vertLinearPower = -gamepad2.left_stick_y;
         } else { vertLinearPower = 0.0;}
 
         // Stop overextension and over retraction of horizontal linear motor
-        liftPosHoriz = horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz;
+        liftPosHoriz = -(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
 
         if (horizSlideSensor.isPressed() || gamepad2.dpad_left) {  // if slide sensor touched or manual adjustment button pressed
             liftPosAdjHoriz = horizLinearMotor.getCurrentPosition();
         }
 
-        if (gamepad2.left_stick_y > 0 && !horizSlideSensor.isPressed()) {
-            horizLinearPower = -gamepad2.left_stick_y * 0.5;
-        } else if (gamepad2.left_stick_y < 0.0 && liftPosHoriz < 8000) {
-            horizLinearPower = -gamepad2.left_stick_y * 0.5;
+        if (gamepad2.right_stick_y > 0
+
+        ) {
+            horizLinearPower = -gamepad2.right_stick_y * 0.25;
+        } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < 8000) {
+            horizLinearPower = -gamepad2.right_stick_y * 0.25;
         } else { horizLinearPower = 0.0;}
 
-        // --------------------------------------- LINEAR SLIDES ---------------------------------------
+        // --------------------------------------- LEAD SCREW ---------------------------------------
         //Only allow hanger to move if not at the extrema, and the limits are not touched.
         if (gamepad1.dpad_up){
             startHanging = true;
@@ -276,12 +279,12 @@ public class ArmAndServo extends OpMode {
             }
         }
 
-        if (startHanging && !hangerSensor2.isPressed()) {hangerMotor.setPower(1.0); }
+        if (startHanging && !hangerSensor2.isPressed()) { hangerMotor.setPower(1.0); }
         else if (gamepad1.dpad_down && !hangerSensor1.isPressed()) { hangerMotor.setPower(-1.0); }
         else { hangerMotor.setPower(0); }
 
         outtakeMotor.setPower(outtakePower);
-        vertLinearMotor.setPower(vertLinearPower);
+        vertLinearMotor.setPower(-vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
 
         if (clawRot > 1) clawRot = 1;
@@ -301,9 +304,11 @@ public class ArmAndServo extends OpMode {
         telemetry.addData("Runtime", getRuntime());
         telemetry.addData("Clicked X", clickedX);
         telemetry.addData("g2RStickY, g2LStickY", gamepad2.right_stick_y + ", " + gamepad2.left_stick_y);
-        telemetry.addData("Vertical, Horizontal", liftPosVert + ", " + liftPosHoriz);
+        telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
+        telemetry.addData("Horizontal, True", liftPosHoriz + ", " + vertLinearMotor.getCurrentPosition());
         telemetry.addData("Gyro: ", "Yaw: " + orientation.getYaw(AngleUnit.DEGREES) + "Roll: " + orientation.getRoll(AngleUnit.DEGREES) + "Pitch: " + orientation.getPitch(AngleUnit.DEGREES));
         telemetry.addData("Slowmode: ", finalSlowMode);
+        telemetry.addData("Arm Pos: ", armRot);
         telemetry.update();
     }
 }
