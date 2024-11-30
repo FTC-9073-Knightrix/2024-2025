@@ -131,7 +131,7 @@ public abstract class TeleOpMethods extends OpMode {
     }
 
     public void runMecanumDrive(){
-
+        // ---------------------------------------MECANUM DRIVE ---------------------------------------
         //Setting boolean hold
         if(gamepad1.right_bumper) {
             //Slowmode
@@ -146,13 +146,10 @@ public abstract class TeleOpMethods extends OpMode {
         }
 
 
-        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
+        double rx = gamepad1.right_stick_x * .5;
 
-        // This button choice was made so that it is hard to hit on accident,
-        // it can be freely changed based on preference.
-        // The equivalent button is start on Xbox-style controllers.
         if (gamepad1.y) {
             imu.resetYaw();
         }
@@ -160,15 +157,11 @@ public abstract class TeleOpMethods extends OpMode {
         orientation = imu.getRobotYawPitchRollAngles();
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        // Rotate the movement direction counter to the bot's rotation
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-        rotX = rotX * 1.1;  // Counteract imperfect strafing
+        rotX = rotX * 1.1;
 
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
         double frontLeftPower = (rotY + rotX + rx) / denominator;
         double backLeftPower = (rotY - rotX + rx) / denominator;
@@ -237,15 +230,22 @@ public abstract class TeleOpMethods extends OpMode {
         // ---------------------------------------BASKET LATCH DROP SYSTEM ---------------------------------------
         // (For both the basket and latch: 1.0 is open, 0.0 is close)
         if (clickedA) return; //PREVENTS BASKET MOVING WHILE IN INTAKE OUTTAKE SYSTEM
-        if (gamepad2.right_bumper) { // Open servo rotate the basket to drop
-            basketDropCurrent1 = getRuntime();
+
+        if (gamepad2.right_bumper) {
+            clickedRB = true;
         }
-        if (getRuntime() > basketDropCurrent1 && basketRot < 0.5) {
-            basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.05;
-        } else if (getRuntime() > basketDropCurrent1 && basketRot < 1.0) {
-            basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.01;
-        } else {
-            basketDropCurrent1 = Double.MAX_VALUE;
+        if (clickedRB) {
+            if (gamepad2.right_bumper) { // Put basket servo in default position
+                basketDropCurrent1 = getRuntime();
+                basketRot = Range.clip(basketRot, 0.0, 0.6) + 0.05;
+            }
+            if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
+                basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.01;
+            }
+            if (getRuntime() > basketDropCurrent1 + 0.1 && basketRot >= 1.0){
+                basketDropCurrent1 = Double.MAX_VALUE;
+                clickedRB = false;
+            }
         }
         if (gamepad2.left_bumper) { // Open latch servo to drop
             basketDropCurrent2 = getRuntime();
