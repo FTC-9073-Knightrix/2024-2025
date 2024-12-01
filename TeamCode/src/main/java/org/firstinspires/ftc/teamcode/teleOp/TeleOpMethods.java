@@ -49,10 +49,18 @@ public abstract class TeleOpMethods extends OpMode {
     double outtakePower = 0.0;
     double hangerPower = 0.0;
 
+    double armDownPos = 0.68;
+    double armDefaultPos = 0.5;
+
+    // Gamepad Conditionals
     boolean clickedA = false;
-    boolean clickedRB = false;
-    boolean armInDefault = true;
     boolean startHanging = false;
+    enum g2Bumpers {
+        NONE,
+        LEFT,
+        RIGHT
+    }
+    g2Bumpers currentG2BumpersPressed = g2Bumpers.NONE;
 
     //Automated time variables
     double autoIntakeOuttakeCurrent1 = Double.MAX_VALUE;
@@ -192,7 +200,6 @@ public abstract class TeleOpMethods extends OpMode {
                 armRot = 0.05;
             }
 
-            // TODO PULL THE HORIZONTAL SLIDE BACK AUTOMATICALLY
             if (getRuntime() > autoIntakeOuttakeCurrent1 + 0.1) {
                 // After 1.25 seconds from press -> Start outtake motor and shoot block out
                 autoIntakeOuttakeCurrent2 = getRuntime();
@@ -206,10 +213,10 @@ public abstract class TeleOpMethods extends OpMode {
                 autoIntakeOuttakeCurrent2 = Double.MAX_VALUE;
                 autoIntakeOuttakeCurrent3 = getRuntime();
                 outtakePower = 0.0;
-                armRot = 0.7;
+                armRot = armDefaultPos;
             }
             // After 2.5 seconds from press -> Close latch
-            if (getRuntime() > autoIntakeOuttakeCurrent3 + 0.5) {
+            if (getRuntime() > autoIntakeOuttakeCurrent3 + 0.3) {
                 autoIntakeOuttakeCurrent3 = Double.MAX_VALUE;
                 latchRot = 0.0;
                 clickedA = false;
@@ -218,8 +225,8 @@ public abstract class TeleOpMethods extends OpMode {
         else {
             outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
 
-            if (gamepad2.x) armRot = 0.72; // Arm Down
-            if (gamepad2.y) armRot = 0.5; // Arm Default
+            if (gamepad2.x) armRot = armDownPos; // Arm Down
+            if (gamepad2.y) armRot = armDefaultPos; // Arm Default
             if (gamepad2.b) armRot = 0.0; // Arm at Bucket
             // Moving arm with dpad
             armRot = armRot + ((gamepad2.dpad_down ? 1 : 0) + (gamepad2.dpad_up ? -1 : 0)) * 0.015;
@@ -231,41 +238,73 @@ public abstract class TeleOpMethods extends OpMode {
         // (For both the basket and latch: 1.0 is open, 0.0 is close)
         if (clickedA) return; //PREVENTS BASKET MOVING WHILE IN INTAKE OUTTAKE SYSTEM
 
-        if (gamepad2.right_bumper) {
-            clickedRB = true;
+        if (gamepad2.right_bumper && currentG2BumpersPressed == g2Bumpers.NONE) {
+            currentG2BumpersPressed = g2Bumpers.RIGHT;
         }
-        if (clickedRB) {
-            if (gamepad2.right_bumper) { // Put basket servo in default position
-                basketDropCurrent1 = getRuntime();
-                basketRot = Range.clip(basketRot, 0.0, 0.6) + 0.05;
-            }
-            if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
-                basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.01;
-            }
-            if (getRuntime() > basketDropCurrent1 + 0.1 && basketRot >= 1.0){
-                basketDropCurrent1 = Double.MAX_VALUE;
-                clickedRB = false;
-            }
-        }
-        if (gamepad2.left_bumper) { // Open latch servo to drop
-            basketDropCurrent2 = getRuntime();
-            latchRot = 1.0;
-        }
-        if (getRuntime() > basketDropCurrent2 + 0.75) { // After .75 sec - close latch servo
-            basketDropCurrent3 = getRuntime();
-            basketDropCurrent2 = Double.MAX_VALUE;
-            latchRot = 0.0;
-        }
-        if (getRuntime() > basketDropCurrent3 + 0.25) { // After 0.25 sec - return bucket
-            basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.02;
-        }
-        if (getRuntime() > basketDropCurrent3 + 2.25) { // After 2 sec - Max the current after the bucket returns
-            basketDropCurrent3 = Double.MAX_VALUE;
+        else if (gamepad2.left_bumper && currentG2BumpersPressed == g2Bumpers.NONE) {
+            currentG2BumpersPressed = g2Bumpers.LEFT;
         }
 
-        if (gamepad2.right_stick_button) {
-            basketRot = 0.0;
+        switch (currentG2BumpersPressed) {
+            case RIGHT:
+                if (gamepad2.right_bumper) { // Put basket servo in default position
+                    basketDropCurrent1 = getRuntime();
+                    basketRot = Range.clip(basketRot, 0.0, 0.6) + 0.05;
+                }
+                if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
+                    basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.03;
+                }
+                if (getRuntime() > basketDropCurrent1 + 0.1 && basketRot >= 1.0){
+                    basketDropCurrent1 = Double.MAX_VALUE;
+                    currentG2BumpersPressed = g2Bumpers.NONE;
+                }
+            case LEFT:
+                if (gamepad2.left_bumper) { // Open latch servo to drop
+                    basketDropCurrent2 = getRuntime();
+                    latchRot = 1.0;
+                }
+                if (getRuntime() > basketDropCurrent2 + 0.75) { // After .75 sec - close latch servo
+                    basketDropCurrent3 = getRuntime();
+                    basketDropCurrent2 = Double.MAX_VALUE;
+                    latchRot = 0.0;
+                }
+                if (getRuntime() > basketDropCurrent3 + 0.1) { // After 0.25 sec - return bucket
+                    basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.03;
+                }
+                if (getRuntime() > basketDropCurrent3 + 0.1 && basketRot <= 0.0) { // After 2 sec - Max the current after the bucket returns
+                    basketDropCurrent3 = Double.MAX_VALUE;
+                    currentG2BumpersPressed = g2Bumpers.NONE;
+                }
         }
+//        if (clickedRB) {
+//            if (gamepad2.right_bumper) { // Put basket servo in default position
+//                basketDropCurrent1 = getRuntime();
+//                basketRot = Range.clip(basketRot, 0.0, 0.6) + 0.05;
+//            }
+//            if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
+//                basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.03;
+//            }
+//            if (getRuntime() > basketDropCurrent1 + 0.1 && basketRot >= 1.0){
+//                basketDropCurrent1 = Double.MAX_VALUE;
+//                clickedRB = false;
+//            }
+//        } else {
+//            if (gamepad2.left_bumper) { // Open latch servo to drop
+//                basketDropCurrent2 = getRuntime();
+//                latchRot = 1.0;
+//            }
+//            if (getRuntime() > basketDropCurrent2 + 0.75) { // After .75 sec - close latch servo
+//                basketDropCurrent3 = getRuntime();
+//                basketDropCurrent2 = Double.MAX_VALUE;
+//                latchRot = 0.0;
+//            }
+//            if (getRuntime() > basketDropCurrent3 + 0.1) { // After 0.25 sec - return bucket
+//                basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.03;
+//            }
+//            if (getRuntime() > basketDropCurrent3 + 0.1 && basketRot <= 0.0) { // After 2 sec - Max the current after the bucket returns
+//                basketDropCurrent3 = Double.MAX_VALUE;
+//            }
+//        }
     }
 
     public void clawSystem() {
@@ -275,12 +314,12 @@ public abstract class TeleOpMethods extends OpMode {
             clawRot = 0.2;
         }
         if (gamepad1.a){
-            clawRot = 1.0;
+            clawRot = 0.8;
         }
     }
 
-    public void linearSlidesSystem() {
-        // --------------------------------------- LINEAR SLIDES ---------------------------------------
+    public void verticalSlideSystem() {
+        // --------------------------------------- VERTICAL LINEAR SLIDES ---------------------------------------
         // Stop overextension and over retraction of vert linear motor
         if (clickedA) return; // PREVENTS SLIDES MOVING WHILE IN INTAKE OUTTAKE SYSTEM
         liftPosVert = -(vertLinearMotor.getCurrentPosition() - liftPosAdjVert);
@@ -291,9 +330,14 @@ public abstract class TeleOpMethods extends OpMode {
 
         if (gamepad2.left_stick_y > 0 && !vertSlideSensor.isPressed()) {
             vertLinearPower = gamepad2.left_stick_y;
-        } else if (gamepad2.left_stick_y < 0 && liftPosVert < 9000) {
+        } else if (gamepad2.left_stick_y < 0 && liftPosVert < 9800) {
             vertLinearPower = gamepad2.left_stick_y;
         } else { vertLinearPower = 0.0;}
+    }
+
+    public void horizonalSlideSystem() {
+        // --------------------------------------- HORIZONTAL LINEAR SLIDES ---------------------------------------
+        if (clickedA) return; // PREVENTS SLIDES MOVING WHILE IN INTAKE OUTTAKE SYSTEM
 
         // Stop overextension and over retraction of horizontal linear motor
         liftPosHoriz = -(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);

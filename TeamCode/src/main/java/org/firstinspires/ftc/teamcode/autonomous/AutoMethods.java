@@ -146,7 +146,7 @@ public abstract class AutoMethods extends LinearOpMode {
         private DcMotorEx vertLift;
 
         public VertLift(HardwareMap hardwareMap) {
-            vertLift = hardwareMap.get(DcMotorEx.class, "vertLiftMotor");
+            vertLift = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
             vertLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             vertLift.setDirection(DcMotorSimple.Direction.FORWARD);
         }
@@ -211,6 +211,76 @@ public abstract class AutoMethods extends LinearOpMode {
         }
     }
 
+
+    public class IntakeMotor {
+        private DcMotorEx intakeMotor;
+
+        public IntakeMotor(HardwareMap hardwareMap) {
+            intakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
+            intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // Adjust if needed
+        }
+
+
+        public class IntakeIn implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Running Forward");
+                return false;
+            }
+        }
+
+        public Action intakeIn() {
+            return new IntakeIn();
+        }
+
+        // Action to outtake (move the motor backward)
+        public class IntakeOut implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(-1);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Running Backward");
+                return false;
+            }
+        }
+
+        public Action intakeOut() {
+            return new IntakeOut();
+        }
+
+        public class IntakeStop implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intakeMotor.setPower(0);
+                    initialized = true;
+                }
+
+                telemetry.addData("Intake Motor", "Stopped");
+                return true;
+            }
+        }
+
+        public Action intakeStop() {
+            return new IntakeStop();
+        }
+    }
+
     TouchSensor vertSlideLimit;
     TouchSensor horizSlideLimit;
 
@@ -223,8 +293,8 @@ public abstract class AutoMethods extends LinearOpMode {
         telemetry.addData("Initialization", "Starting...");
         telemetry.addData("Initialization", "Done!");
 
-        vertSlideLimit = hardwareMap.touchSensor.get("vertSlideLimit");
-        horizSlideLimit = hardwareMap.touchSensor.get("horizSlideLimit");
+        vertSlideLimit = hardwareMap.touchSensor.get("vertSlideSensor");
+        horizSlideLimit = hardwareMap.touchSensor.get("horizSlideSensor");
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
 

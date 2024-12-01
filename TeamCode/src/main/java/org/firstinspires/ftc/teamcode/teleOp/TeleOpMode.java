@@ -11,7 +11,8 @@ public class TeleOpMode extends TeleOpMethods {
         intakeOuttakeSystem();
         basketSystem();
         clawSystem();
-        linearSlidesSystem();
+        verticalSlideSystem();
+        horizonalSlideSystem();
         updateAttachments();
         addTelemetryToDriverStation();
     }
