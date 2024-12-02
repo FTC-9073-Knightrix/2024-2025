@@ -13,6 +13,7 @@ public class TeleOpMode extends TeleOpMethods {
         clawSystem();
         verticalSlideSystem();
         horizonalSlideSystem();
+        leadScrewSystem();
         updateAttachments();
         addTelemetryToDriverStation();
     }

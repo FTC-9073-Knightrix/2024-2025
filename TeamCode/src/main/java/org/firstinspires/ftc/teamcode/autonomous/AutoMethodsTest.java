@@ -26,6 +26,7 @@ public class AutoMethodsTest extends AutoMethods {
                     new SequentialAction(
                             latchServo.openLatch(),
                             intakeMotor.intakeIn(),
+
                             new SleepAction(2.0),
                             intakeMotor.intakeStop(),
                             armServo.closeArm(),
