@@ -216,7 +216,7 @@ public abstract class AutoMethods extends LinearOpMode {
         private DcMotorEx intakeMotor;
 
         public IntakeMotor(HardwareMap hardwareMap) {
-            intakeMotor = hardwareMap.get(DcMotorEx.class, "outtakeMotor");
+            intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
             intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD); // Adjust if needed
         }

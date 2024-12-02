@@ -18,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
 public abstract class TeleOpMethods extends OpMode {
+    // ------------------------------------ TELEOP VARIABLES ------------------------------------
     //Drive train speeds
     final double driveSpeed = 0.66;
     final double fastSpeed = 1.0;
@@ -45,13 +46,17 @@ public abstract class TeleOpMethods extends OpMode {
     //Motor variables
     int liftPosHoriz = 0;
     int liftPosAdjHoriz = 0;
+    int maximumHorizExtend; // TODO add when magnet sensor mounted
+    double horizLinearPower = 0.0;
+
     int liftPosVert = 0;
     int liftPosAdjVert = 0;
+    int maximumVertExtend = 4200;
     double vertLinearPower = 0.0;
-    double horizLinearPower = 0.0;
-    double outtakePower = 0.0;
-    double hangerPower = 0.0;
 
+    double intakePower = 0.0;
+
+    double hangerPower = 0.0;
 
     // Gamepad Conditionals
     boolean clickedA = false;
@@ -66,9 +71,10 @@ public abstract class TeleOpMethods extends OpMode {
     g2Bumpers currentG2BumpersActions = g2Bumpers.NONE;
 
     //Automated time variables
-    double autoIntakeOuttakeCurrent1 = Double.MAX_VALUE;
-    double autoIntakeOuttakeCurrent2 = Double.MAX_VALUE;
-    double autoIntakeOuttakeCurrent3 = Double.MAX_VALUE;
+
+    double autoIntakeCurrent1 = Double.MAX_VALUE;
+    double autoIntakeCurrent2 = Double.MAX_VALUE;
+    double autoIntakeCurrent3 = Double.MAX_VALUE;
 
     double basketDropCurrent1 = Double.MAX_VALUE;
     double basketDropCurrent2 = Double.MAX_VALUE;
@@ -78,7 +84,7 @@ public abstract class TeleOpMethods extends OpMode {
     double latchCurrent1 =  Double.MAX_VALUE;
 
     // Electronics
-    public DcMotor outtakeMotor;
+    public DcMotor intakeMotor;
     public DcMotor vertLinearMotor;
     public DcMotor horizLinearMotor;
     public DcMotor hangerMotor;
@@ -101,9 +107,10 @@ public abstract class TeleOpMethods extends OpMode {
 
     @Override
     public void init() {
+        // --------------------------------------- INITIALIZATION ---------------------------------------
         telemetry.addData("Initialization","Starting...");
 
-        outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Expansion Hub Motor 0
+        intakeMotor= hardwareMap.dcMotor.get("intakeMotor"); // Expansion Hub Motor 0
         vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Expansion Hub Motor 1
         horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Expansion Hub Motor 2
         hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Expansion Hub Motor 3
@@ -195,41 +202,41 @@ public abstract class TeleOpMethods extends OpMode {
         }
 
         if (clickedA) {
-            // outtakeServo (1 is intake, -1 is outtake)
+            // intakeMotor (1 is intake, -1 is outtake)
             // armServo (0 is up, 1 is down)
             if (gamepad2.a) {
-                // Gamepad 1 a pressed -> Stop outtake motor and pull servo up
-                outtakePower = 0.0;
+                // Gamepad 1 a pressed -> Stop intake motor and pull servo up
+                intakePower = 0.0;
                 horizLinearPower = -0.9;
                 latchRot = 1.0;
-                autoIntakeOuttakeCurrent1 = getRuntime();
+                autoIntakeCurrent1 = getRuntime();
                 armRot = armAtBasketPos;
             }
 
-            if (getRuntime() > autoIntakeOuttakeCurrent1 + 0.1) {
-                // After .1 seconds from release -> Start outtake motor and shoot block out
-                autoIntakeOuttakeCurrent2 = getRuntime();
+            if (getRuntime() > autoIntakeCurrent1 + 0.1) {
+                // After .1 seconds from release -> Start intake motor and shoot block out
+                autoIntakeCurrent2 = getRuntime();
                 horizLinearPower = 0.0;
-                outtakePower = -1.0;
-                autoIntakeOuttakeCurrent1 = Double.MAX_VALUE;
+                intakePower = -1.0;
+                autoIntakeCurrent1 = Double.MAX_VALUE;
             }
 
-            if (getRuntime() > autoIntakeOuttakeCurrent2 + 0.75) {
+            if (getRuntime() > autoIntakeCurrent2 + 0.75) {
                 // After .75 seconds from press -> Pull servo down to default
-                autoIntakeOuttakeCurrent2 = Double.MAX_VALUE;
-                autoIntakeOuttakeCurrent3 = getRuntime();
+                autoIntakeCurrent2 = Double.MAX_VALUE;
+                autoIntakeCurrent3 = getRuntime();
                 armRot = armDefaultPos;
             }
-            // After .3 seconds from press -> Close latch and stop outtake motor
-            if (getRuntime() > autoIntakeOuttakeCurrent3 + 0.3) {
-                autoIntakeOuttakeCurrent3 = Double.MAX_VALUE;
-                outtakePower = 0.0;
+            // After .3 seconds from press -> Close latch and stop intake motor
+            if (getRuntime() > autoIntakeCurrent3 + 0.3) {
+                autoIntakeCurrent3 = Double.MAX_VALUE;
+                intakePower = 0.0;
                 latchRot = 0.0;
                 clickedA = false;
             }
         }
         else {
-            outtakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
+            intakePower = (gamepad2.right_trigger) - (gamepad2.left_trigger); // rt = intake, lt = outtake
 
             if (gamepad2.x) armRot = armDownPos; // Arm Down
             if (gamepad2.y) armRot = armDefaultPos; // Arm Default
@@ -294,10 +301,10 @@ public abstract class TeleOpMethods extends OpMode {
                 }
                 if (getRuntime() > basketDropCurrent3 + 0.05) { // After 0.05 sec - return basket to apex
                     basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.03;
-                    basketDropCurrent3 = Double.MAX_VALUE;
                     basketDropCurrent4 = getRuntime();
                 }
                 if (getRuntime() > basketDropCurrent4 && basketRot <= 0.65) { // Slow basket down once it reaches apex
+                    basketDropCurrent3 = Double.MAX_VALUE;
                     basketRot = Range.clip(basketRot, 0.0, 1.0) - 0.01;
                     if (basketRot <= 0.0) { // Max the current after the basket returns
                         basketDropCurrent4 = Double.MAX_VALUE;
@@ -331,7 +338,7 @@ public abstract class TeleOpMethods extends OpMode {
 
         if (gamepad2.left_stick_y > 0 && !vertSlideSensor.isPressed() && basketRot < 0.75) { // Don't let slide pull down while basket is over game bucket
             vertLinearPower = gamepad2.left_stick_y;
-        } else if (gamepad2.left_stick_y < 0 && liftPosVert < 4200) {
+        } else if (gamepad2.left_stick_y < 0 && liftPosVert < maximumVertExtend) {
             vertLinearPower = gamepad2.left_stick_y;
         } else { vertLinearPower = 0.0;}
     }
@@ -371,13 +378,13 @@ public abstract class TeleOpMethods extends OpMode {
 
     public void updateAttachments() {
         // -------------------------- SET MOTOR POWERS AND SERVO POSITIONS --------------------------
-        outtakeMotor.setPower(outtakePower);
+        intakeMotor.setPower(intakePower);
         vertLinearMotor.setPower(vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
         hangerMotor.setPower(hangerPower);
 
-        clawServo.setPosition(Range.clip(clawRot, 0.2, 1.0));
-        armServo.setPosition(Range.clip(armRot, 0.0, 1.0));
+        clawServo.setPosition(Range.clip(clawRot, 0.2, 0.8));
+        armServo.setPosition(Range.clip(armRot, 0.05, 0.8));
         basketServo.setPosition(Range.clip(basketRot, 0.0, 1.0));
         latchServo.setPosition(Range.clip(latchRot,0.0, 1.0));
     }

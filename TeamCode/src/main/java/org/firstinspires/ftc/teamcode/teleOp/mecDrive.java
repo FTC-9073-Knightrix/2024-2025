@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp;
 
+import android.annotation.SuppressLint;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -58,6 +60,7 @@ public class mecDrive extends OpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
     }
 
+    @SuppressLint("DefaultLocale")
     public void loop() {
         mecanumDrive();
         telemetry.addData("Gyro: ", "Yaw: " + String.format("%.2f", orientation.getYaw(AngleUnit.DEGREES))
