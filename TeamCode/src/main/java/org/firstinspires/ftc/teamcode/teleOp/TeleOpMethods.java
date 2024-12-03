@@ -28,10 +28,10 @@ public abstract class TeleOpMethods extends OpMode {
 
     //Drivetrain hardware
     MecanumDrive mecanumDrive;
-    Motor leftFront;
-    Motor rightFront;
-    Motor leftBack;
-    Motor rightBack;
+    public Motor leftFront;
+    public Motor rightFront;
+    public Motor leftBack;
+    public Motor rightBack;
 
     //Servo variables
     double armDownPos = 0.68;
@@ -195,6 +195,7 @@ public abstract class TeleOpMethods extends OpMode {
         rightBack.set(backRightPower * finalSlowMode);
     }
 
+    // TODO Make g2.b cancel the system
     public void intakeOuttakeSystem() {
         // ---------------------------------------INTAKE OUTTAKE SYSTEM ---------------------------------------
         if (gamepad2.a){
