@@ -41,7 +41,7 @@ public abstract class TeleOpMethods extends OpMode {
     double armRot = armDefaultPos; // start the arm halfway
     double basketRot = 0.0;
     double latchRot = 1.0;
-    double clawRot = 0.0;
+    double clawRot = 0.2;
 
     //Motor variables
     int liftPosHoriz = 0;
@@ -62,6 +62,7 @@ public abstract class TeleOpMethods extends OpMode {
     boolean clickedA = false;
     boolean startHanging = false;
     boolean latchManualToggle = false;
+    boolean clawToggle = false;
 
     enum g2Bumpers {
         NONE,
@@ -82,6 +83,8 @@ public abstract class TeleOpMethods extends OpMode {
     double basketDropCurrent4 = Double.MAX_VALUE;
 
     double latchCurrent1 =  Double.MAX_VALUE;
+
+    double clawCurrent1 = Double.MAX_VALUE;
 
     // Electronics
     public DcMotor intakeMotor;
@@ -257,7 +260,6 @@ public abstract class TeleOpMethods extends OpMode {
                     latchCurrent1 = Double.MAX_VALUE;
                 }
             }
-
         }
     }
 
@@ -317,12 +319,18 @@ public abstract class TeleOpMethods extends OpMode {
 
     public void clawSystem() {
         // --------------------------------------- CLAW SERVO SYSTEM ---------------------------------------
-        // (0.2 is closed, 1.0 is open)
-        if (gamepad1.b){
-            clawRot = 0.2;
+        // (0.2 is closed, 0.8 is open)
+        // Manual toggle for latch
+        if (gamepad1.a && !clawToggle){
+            clawToggle = true;
+            clawRot = clawRot == 0.2 ? 0.8 : 0.2;
+            clawCurrent1 = getRuntime();
         }
-        if (gamepad1.a){
-            clawRot = 0.8;
+        if (clawToggle) {
+            if (getRuntime() > latchCurrent1 + 0.2){
+                clawToggle = false;
+                clawCurrent1 = Double.MAX_VALUE;
+            }
         }
     }
 
