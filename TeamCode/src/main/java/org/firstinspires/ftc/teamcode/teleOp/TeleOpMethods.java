@@ -172,7 +172,7 @@ public abstract class TeleOpMethods extends OpMode {
 
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x * .5;
+        double rx = gamepad1.right_stick_x * .8;
 
         if (gamepad1.y) {
             imu.resetYaw();
