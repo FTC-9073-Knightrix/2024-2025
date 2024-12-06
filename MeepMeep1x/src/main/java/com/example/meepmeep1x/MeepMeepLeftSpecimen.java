@@ -1,12 +1,11 @@
 package com.example.meepmeep1x;
 
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
-public class MeepMeepLeft1x {
+public class MeepMeepLeftSpecimen {
 
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
@@ -15,11 +14,13 @@ public class MeepMeepLeft1x {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .build();
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-12, -72, Math.toRadians(270)))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(12, -72, Math.toRadians(270)))
                 .lineToY(-32)
-                .splineToLinearHeading(new Pose2d(-33, -25, Math.toRadians(180)), Math.toRadians(0))
-
-                .lineToXLinearHeading(-52, Math.toRadians(45))
+                .lineToY(-48)
+                .splineToLinearHeading(new Pose2d(48, -48, Math.toRadians(90)), Math.toRadians(90))
+                .lineToY(-60)
+                .lineToY(-56)
+                .splineToLinearHeading(new Pose2d(12, -32, Math.toRadians(270)), Math.toRadians(90))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

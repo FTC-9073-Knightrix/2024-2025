@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.autonomous.MecanumDrive;
 
 public abstract class AutoMethods extends LinearOpMode {
-    public class LatchServo {
+    public static class LatchServo {
         private Servo latchServo;
 
         public LatchServo(HardwareMap hardwareMap) {

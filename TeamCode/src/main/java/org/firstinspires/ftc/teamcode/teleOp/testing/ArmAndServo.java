@@ -89,7 +89,7 @@ public class ArmAndServo extends OpMode {
     public void init() {
         telemetry.addData("Initialization","Starting...");
 
-        outtakeMotor= hardwareMap.dcMotor.get("outtakeMotor"); // Expansion Hub Motor 0
+        outtakeMotor= hardwareMap.dcMotor.get("intakeMotor"); // Expansion Hub Motor 0
         vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Expansion Hub Motor 1
         horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Expansion Hub Motor 2
         hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Expansion Hub Motor 3
@@ -313,6 +313,7 @@ public class ArmAndServo extends OpMode {
 
         telemetry.addData("Runtime", getRuntime());
         telemetry.addData("Clicked X", clickedX);
+        telemetry.addData("Magnet Pressed", vertSlideSensor.isPressed());
         telemetry.addData("g2RStickY, g2LStickY", gamepad2.right_stick_y + ", " + gamepad2.left_stick_y);
         telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
         telemetry.addData("Horizontal, True", liftPosHoriz + ", " + vertLinearMotor.getCurrentPosition());

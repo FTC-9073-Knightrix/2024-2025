@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode.teleOp;
-
 import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -8,12 +7,14 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
@@ -51,7 +52,7 @@ public abstract class TeleOpMethods extends OpMode {
 
     int liftPosVert = 0;
     int liftPosAdjVert = 0;
-    int maximumVertExtend = 4000;
+    int maximumVertExtend = 3600;
     double vertLinearPower = 0.0;
 
     double intakePower = 0.0;
@@ -62,7 +63,6 @@ public abstract class TeleOpMethods extends OpMode {
     boolean clickedA = false;
     boolean startHanging = false;
     boolean latchManualToggle = false;
-    boolean clawToggle = false;
 
     enum g2Bumpers {
         NONE,
@@ -84,10 +84,10 @@ public abstract class TeleOpMethods extends OpMode {
 
     double latchCurrent1 =  Double.MAX_VALUE;
 
-    double clawCurrent1 = Double.MAX_VALUE;
+//    double clawCurrent1 = Double.MAX_VALUE;
 
     // Electronics
-    public DcMotor intakeMotor;
+    public DcMotorEx intakeMotor;
     public DcMotor vertLinearMotor;
     public DcMotor horizLinearMotor;
     public DcMotor hangerMotor;
@@ -113,7 +113,7 @@ public abstract class TeleOpMethods extends OpMode {
         // --------------------------------------- INITIALIZATION ---------------------------------------
         telemetry.addData("Initialization","Starting...");
 
-        intakeMotor= hardwareMap.dcMotor.get("intakeMotor"); // Expansion Hub Motor 0
+        intakeMotor= hardwareMap.get(DcMotorEx.class, "intakeMotor"); // Expansion Hub Motor 0
         vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Expansion Hub Motor 1
         horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Expansion Hub Motor 2
         hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Expansion Hub Motor 3
@@ -211,13 +211,12 @@ public abstract class TeleOpMethods extends OpMode {
             if (gamepad2.a) {
                 // Gamepad 1 a pressed -> Stop intake motor and pull servo up
                 intakePower = 0.0;
-                horizLinearPower = -0.9;
+                horizLinearPower = -1.0;
                 latchRot = 1.0;
                 autoIntakeCurrent1 = getRuntime();
                 armRot = armAtBasketPos;
             }
 
-            // TODO RETURN HORIZONTAL SLIDE TO ITS ORIGINAL POSITION
             if (gamepad2.b) { // cancel intakeOuttakeSystem
                 clickedA = false;
                 intakePower = 0.0;
@@ -244,7 +243,7 @@ public abstract class TeleOpMethods extends OpMode {
                 armRot = armDefaultPos;
             }
             // After .3 seconds from press -> Close latch and stop intake motor
-            if (getRuntime() > autoIntakeCurrent3 + 0.3) {
+            if (getRuntime() > autoIntakeCurrent3 + 0.4) {
                 autoIntakeCurrent3 = Double.MAX_VALUE;
                 intakePower = 0.0;
                 latchRot = 0.0;
@@ -300,7 +299,7 @@ public abstract class TeleOpMethods extends OpMode {
             case RIGHT:
                 if (gamepad2.right_bumper) { // Put basket servo in default position
                     basketDropCurrent1 = getRuntime();
-                    basketRot = Range.clip(basketRot, 0.0, 0.7) + 0.02;
+                    basketRot = Range.clip(basketRot, 0.0, 0.7) + 0.04;
                 }
                 if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
                     basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.02;
@@ -336,18 +335,13 @@ public abstract class TeleOpMethods extends OpMode {
 
     public void clawSystem() {
         // --------------------------------------- CLAW SERVO SYSTEM ---------------------------------------
-        // (0.2 is closed, 0.8 is open)
+        // (0.2 is open, 0.7 is closed)
         // Manual toggle for latch
-        if (gamepad1.a && !clawToggle){
-            clawToggle = true;
-            clawRot = clawRot == 0.2 ? 0.8 : 0.2;
-            clawCurrent1 = getRuntime();
+        if (gamepad1.a){
+            clawRot = 0.2;
         }
-        if (clawToggle) {
-            if (getRuntime() > latchCurrent1 + 0.2){
-                clawToggle = false;
-                clawCurrent1 = Double.MAX_VALUE;
-            }
+        if (gamepad1.b){
+            clawRot = 0.7;
         }
     }
 
@@ -368,11 +362,13 @@ public abstract class TeleOpMethods extends OpMode {
         }
         else if (gamepad2.left_stick_y < 0 && liftPosVert < maximumVertExtend) {
             vertLinearPower = gamepad2.left_stick_y;
+            if (liftPosVert > maximumVertExtend - 100) vertLinearPower *= 0.2;
             if (liftPosVert < 350) latchRot = 0.0; // auto close latch to prevent snapping on the lead screw
         }
-        else if (gamepad2.left_stick_y == 0 && liftPosVert < maximumVertExtend && !vertSlideSensor.isPressed()) { // Stop slipping
+        else if (gamepad2.left_stick_y == 0 && liftPosVert < maximumVertExtend && !vertSlideSensor.isPressed()) { // Stop slide slipping
             vertLinearPower = -0.12;
-        } else { vertLinearPower = 0.0;}
+        }
+        else { vertLinearPower = 0.0;}
     }
 
     public void horizonalSlideSystem() {
@@ -415,7 +411,7 @@ public abstract class TeleOpMethods extends OpMode {
         horizLinearMotor.setPower(horizLinearPower);
         hangerMotor.setPower(hangerPower);
 
-        clawRot = Range.clip(clawRot, 0.2, 0.8);
+        clawRot = Range.clip(clawRot, 0.2, 0.6);
         armRot = Range.clip(armRot, 0.05, 0.8);
         basketRot = Range.clip(basketRot, 0.0, 1.0);
         latchRot = Range.clip(latchRot, 0.0, 1.0);
@@ -430,6 +426,7 @@ public abstract class TeleOpMethods extends OpMode {
     public void addTelemetryToDriverStation() {
         telemetry.addData("Runtime", getRuntime());
         telemetry.addData("Clicked A", clickedA);
+        telemetry.addData("INTAKE AMPS", String.format("%.3f", intakeMotor.getCurrent(CurrentUnit.AMPS)));
         telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
         telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
         telemetry.addData("Horizontal, True", liftPosHoriz + ", " + horizLinearMotor.getCurrentPosition());
