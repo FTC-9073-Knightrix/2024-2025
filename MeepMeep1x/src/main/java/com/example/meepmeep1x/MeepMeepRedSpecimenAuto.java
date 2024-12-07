@@ -22,7 +22,8 @@ public class MeepMeepRedSpecimenAuto {
                 .lineToY(-62)
 
                 .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(4, -32, Math.toRadians(270)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(4, -34, Math.toRadians(270)), Math.toRadians(90))
+                .lineToY(-32)
 
                 .splineToConstantHeading(new Vector2d(4, -34), Math.toRadians(270))
                 .splineToConstantHeading(new Vector2d( 35, -34), Math.toRadians(90))
