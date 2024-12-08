@@ -53,6 +53,8 @@ public abstract class AutoMethods extends LinearOpMode {
     //Create the orientation variable for the robot position
     public YawPitchRollAngles orientation;
 
+    int specimenAboveChamberHeight = -2287;
+    int specimenHookedOntoChamberHeight = -1600;
     public void initRobot() {
         runtime = new ElapsedTime();
         // --------------------------------------- INITIALIZATION ---------------------------------------
@@ -87,5 +89,33 @@ public abstract class AutoMethods extends LinearOpMode {
         vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addData("Initialization","Done!");
+    }
+    public void raiseSlideAboveChamber() {
+        vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertLinearMotor.setTargetPosition(specimenAboveChamberHeight);
+        vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        vertLinearMotor.setPower(-1);
+        while (vertLinearMotor.isBusy() && opModeIsActive()) { // raise slide
+            vertLinearMotor.setPower(-1);
+        }
+        vertLinearMotor.setPower(0);
+    }
+    public void clipSpecimenOntoChamberAndDropSlide() {
+        vertLinearMotor.setTargetPosition(specimenHookedOntoChamberHeight);
+        runtime.reset();
+        vertLinearMotor.setPower(0.4);
+        while (vertLinearMotor.isBusy() && opModeIsActive()) { // hook onto bar
+            vertLinearMotor.setPower(0.4);
+        }
+        clawServo.setPosition(0.2);
+        sleep(50);
+        vertLinearMotor.setPower(0);
+        vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        while (!vertSlideSensor.isPressed() && opModeIsActive()) { // bring slide down
+            vertLinearMotor.setPower(1);
+        }
+        vertLinearMotor.setPower(0);
+        vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 }

@@ -199,16 +199,7 @@ public abstract class TeleOpMethods extends OpMode {
         rightFront.set(frontRightPower * finalSlowMode);
         rightBack.set(backRightPower * finalSlowMode);
 
-        if (gamepad1.dpad_down){
-            robotCentric = true;
-        }
-        if (gamepad1.dpad_up){
-            robotCentric = false;
-        }
-
-        if (robotCentric){
-            imu.resetYaw();
-        }
+        robotCentric = false;
     }
 
     // TODO Make g2.b cancel the system
