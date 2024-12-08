@@ -63,6 +63,8 @@ public abstract class TeleOpMethods extends OpMode {
     boolean clickedA = false;
     boolean startHanging = false;
     boolean latchManualToggle = false;
+    boolean clawOpen = true;
+    boolean robotCentric = true;
 
     enum g2Bumpers {
         NONE,
@@ -196,6 +198,17 @@ public abstract class TeleOpMethods extends OpMode {
         leftBack.set(backLeftPower * finalSlowMode);
         rightFront.set(frontRightPower * finalSlowMode);
         rightBack.set(backRightPower * finalSlowMode);
+
+        if (gamepad1.dpad_down){
+            robotCentric = true;
+        }
+        if (gamepad1.dpad_up){
+            robotCentric = false;
+        }
+
+        if (robotCentric){
+            imu.resetYaw();
+        }
     }
 
     // TODO Make g2.b cancel the system
@@ -299,7 +312,7 @@ public abstract class TeleOpMethods extends OpMode {
             case RIGHT:
                 if (gamepad2.right_bumper) { // Put basket servo in default position
                     basketDropCurrent1 = getRuntime();
-                    basketRot = Range.clip(basketRot, 0.0, 0.7) + 0.04;
+                    basketRot = Range.clip(basketRot, 0.0, 0.65) + 0.04;
                 }
                 if (getRuntime() > basketDropCurrent1 + 0.1) { // After 0.1 sec - rotate basket fully on release
                     basketRot = Range.clip(basketRot, 0.0, 1.0) + 0.02;
@@ -335,13 +348,15 @@ public abstract class TeleOpMethods extends OpMode {
 
     public void clawSystem() {
         // --------------------------------------- CLAW SERVO SYSTEM ---------------------------------------
-        // (0.2 is open, 0.7 is closed)
+        // (0.2 is open, 0.5 is closed)
         // Manual toggle for latch
         if (gamepad1.a){
             clawRot = 0.2;
+            clawOpen = true;
         }
         if (gamepad1.b){
-            clawRot = 0.7;
+            clawRot = 0.5;
+            clawOpen = false;
         }
     }
 
@@ -358,6 +373,7 @@ public abstract class TeleOpMethods extends OpMode {
 
         if (gamepad2.left_stick_y > 0 && !vertSlideSensor.isPressed() && basketRot < 0.75) { // Don't let slide pull down while basket is over game bucket
             vertLinearPower = gamepad2.left_stick_y;
+            if (!clawOpen) vertLinearPower *= 0.015;
             if (liftPosVert > 350) latchRot = 0.0; // auto close latch to prevent snapping on the lead screw
         }
         else if (gamepad2.left_stick_y < 0 && liftPosVert < maximumVertExtend) {
@@ -411,7 +427,7 @@ public abstract class TeleOpMethods extends OpMode {
         horizLinearMotor.setPower(horizLinearPower);
         hangerMotor.setPower(hangerPower);
 
-        clawRot = Range.clip(clawRot, 0.2, 0.6);
+        clawRot = Range.clip(clawRot, 0.2, 0.5);
         armRot = Range.clip(armRot, 0.05, 0.8);
         basketRot = Range.clip(basketRot, 0.0, 1.0);
         latchRot = Range.clip(latchRot, 0.0, 1.0);
