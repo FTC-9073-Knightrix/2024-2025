@@ -9,7 +9,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name = "Auto Test", group = "Autonomous")
+@Autonomous(name = "SpecimenAuto", group = "Autonomous")
 public class SpecimenAuto extends AutoMethods {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -32,7 +32,7 @@ public class SpecimenAuto extends AutoMethods {
         // Drives to observation zone
         Action action3 = drive.actionBuilder(new Pose2d(8, -32, Math.toRadians(270)))
                 .splineToConstantHeading(new Vector2d(8, -34), Math.toRadians(270))
-                .splineToLinearHeading(new Pose2d(46, -58, Math.toRadians(92.5)), Math.toRadians(270))
+                .splineToLinearHeading(new Pose2d(46, -58, Math.toRadians(89)), Math.toRadians(270))
                 .waitSeconds(0.75)
                 .lineToY(-66)
                 .build();
@@ -40,12 +40,13 @@ public class SpecimenAuto extends AutoMethods {
         // Drives back to bar a bit in front
         Action action4 = drive.actionBuilder(new Pose2d(46, -62, Math.toRadians(90)))
                 .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-4, -33, Math.toRadians(270)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-4, -34, Math.toRadians(270)), Math.toRadians(90))
                 .build();
 
         // Drives into bar #2
-        Action action5 = drive.actionBuilder(new Pose2d(-4, -33,Math.toRadians(270)))
-                .lineToY(-31.5)
+        Action action5 = drive.actionBuilder(new Pose2d(-4, -34
+                ,Math.toRadians(270)))
+                .lineToY(-32)
                 .build();
 
         // Pushes blocks and finishes in observation zone
@@ -54,14 +55,14 @@ public class SpecimenAuto extends AutoMethods {
                 .splineToConstantHeading(new Vector2d( 35, -34), Math.toRadians(90))
 
                 .splineToConstantHeading(new Vector2d(35, -15), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(44, -15), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(45, -15), Math.toRadians(270))
                 .lineToY(-61)
 
 
                 .lineToY(-15)
                 .splineToConstantHeading(new Vector2d(55, -15), Math.toRadians(270))
                 .lineToY(-61)
-                .turnTo(Math.toRadians(180))
+//                .turnTo(Math.toRadians(180))
                 .build();
 
         if (opModeInInit()) {

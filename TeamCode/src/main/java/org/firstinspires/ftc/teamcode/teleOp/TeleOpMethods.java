@@ -64,7 +64,7 @@ public abstract class TeleOpMethods extends OpMode {
     boolean startHanging = false;
     boolean latchManualToggle = false;
     boolean clawOpen = true;
-    boolean robotCentric = true;
+    boolean robotCentric = false;
 
     enum g2Bumpers {
         NONE,
