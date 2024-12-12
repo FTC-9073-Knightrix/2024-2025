@@ -26,11 +26,12 @@ public class SpecimenAuto extends AutoMethods {
 
         // Drives into bar #1
         Action action2 = drive.actionBuilder(new Pose2d(8, -34, Math.toRadians(270)))
-                .lineToY(-32)
+                .lineToY(-31.5)
                 .build();
 
         // Drives to observation zone
-        Action action3 = drive.actionBuilder(new Pose2d(8, -32, Math.toRadians(270)))
+        Action action3 = drive.actionBuilder(new Pose2d(8, -31
+                        , Math.toRadians(270)))
                 .splineToConstantHeading(new Vector2d(8, -34), Math.toRadians(270))
                 .splineToLinearHeading(new Pose2d(46, -58, Math.toRadians(89)), Math.toRadians(270))
                 .waitSeconds(0.75)
@@ -40,28 +41,30 @@ public class SpecimenAuto extends AutoMethods {
         // Drives back to bar a bit in front
         Action action4 = drive.actionBuilder(new Pose2d(46, -62, Math.toRadians(90)))
                 .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(-4, -34, Math.toRadians(270)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(-4, -35, Math.toRadians(270)), Math.toRadians(90))
                 .build();
 
         // Drives into bar #2
-        Action action5 = drive.actionBuilder(new Pose2d(-4, -34
-                ,Math.toRadians(270)))
-                .lineToY(-32)
+        Action action5 = drive.actionBuilder(new Pose2d(-4, -35,Math.toRadians(270)))
+                .lineToY(-34.25)
                 .build();
 
         // Pushes blocks and finishes in observation zone
-        Action action6 = drive.actionBuilder(new Pose2d(-4, -32, Math.toRadians(270)))
+        Action action6 = drive.actionBuilder(new Pose2d(-4, -34.25, Math.toRadians(270)))
                 .splineToConstantHeading(new Vector2d(-4, -34), Math.toRadians(270))
                 .splineToConstantHeading(new Vector2d( 35, -34), Math.toRadians(90))
 
-                .splineToConstantHeading(new Vector2d(35, -15), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(45, -15), Math.toRadians(270))
-                .lineToY(-61)
-
-
-                .lineToY(-15)
-                .splineToConstantHeading(new Vector2d(55, -15), Math.toRadians(270))
-                .lineToY(-61)
+//                .lineToY(-58)
+//                .turnTo(Math.toRadians(90))
+//                .strafeToConstantHeading(new Vector2d(50, -58))
+                .splineToConstantHeading(new Vector2d(35, -17), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(45, -17), Math.toRadians(270))
+                .lineToY(-63)
+//
+//
+//                .lineToY(-14)
+//                .splineToConstantHeading(new Vector2d(53, -16), Math.toRadians(270))
+//                .lineToY(-64)
 //                .turnTo(Math.toRadians(180))
                 .build();
 
@@ -129,39 +132,46 @@ public class SpecimenAuto extends AutoMethods {
 //            );
 
             sleep(500);
-
+//
+            vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            vertLinearMotor.setTargetPosition(-150);
+            vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            while (vertLinearMotor.isBusy() && opModeIsActive()) { // pull up a bit
+                vertLinearMotor.setPower(-0.75);
+            }
             clawServo.setPosition(0.55); // grab specimen from human player
             sleep(100);
             vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            vertLinearMotor.setTargetPosition(-400);
+            vertLinearMotor.setTargetPosition(-600);
             vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             while (vertLinearMotor.isBusy() && opModeIsActive()) { // pull up from wall
                 vertLinearMotor.setPower(-0.75);
             }
             vertLinearMotor.setPower(0);
-
+//
             Actions.runBlocking(new SequentialAction(action4));
-//                    drive.actionBuilder(new Pose2d(46, -62, Math.toRadians(90)))
-//                .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
-//                .splineToLinearHeading(new Pose2d(-4, -33, Math.toRadians(270)), Math.toRadians(90))
-//                .build()
-//            );
+////                    drive.actionBuilder(new Pose2d(46, -62, Math.toRadians(90)))
+////                .splineToConstantHeading(new Vector2d(46, -61), Math.toRadians(90))
+////                .splineToLinearHeading(new Pose2d(-4, -33, Math.toRadians(270)), Math.toRadians(90))
+////                .build()
+////            );
             raiseSlideAboveChamber();
-//            vertLinearMotor.setTargetPosition(specimenAboveChamberHeight);
-//            runtime.reset();
-//            vertLinearMotor.setPower(-1);
-//            while (vertLinearMotor.isBusy() && opModeIsActive()) { // raise slide
-//                vertLinearMotor.setPower(-1);
-//            }
-//            vertLinearMotor.setPower(0);
-
+////            vertLinearMotor.setTargetPosition(specimenAboveChamberHeight);
+////            runtime.reset();
+////            vertLinearMotor.setPower(-1);
+////            while (vertLinearMotor.isBusy() && opModeIsActive()) { // raise slide
+////                vertLinearMotor.setPower(-1);
+////            }
+////            vertLinearMotor.setPower(0);
+//
             Actions.runBlocking( new SequentialAction(action5));// drive fully into bar
-//                    drive.actionBuilder(new Pose2d(-4, -34,Math.toRadians(270)))
-//                            .lineToY(-31.5)
-//                            .build()
-//            );
-
+////                    drive.actionBuilder(new Pose2d(-4, -34,Math.toRadians(270)))
+////                            .lineToY(-31.5)
+////                            .build()
+////            );
+//
             clipSpecimenOntoChamberAndDropSlide();
+            armServo.setPosition(0.35);
 //            vertLinearMotor.setTargetPosition(specimenHookedOntoChamberHeight);
 //            runtime.reset();
 //            vertLinearMotor.setPower(0.4);
@@ -179,21 +189,21 @@ public class SpecimenAuto extends AutoMethods {
 //            vertLinearMotor.setPower(0);
 //            vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             Actions.runBlocking(new SequentialAction(action6));
-//                    drive.actionBuilder(new Pose2d(4, -32, Math.toRadians(270)))
-//                .splineToConstantHeading(new Vector2d(4, -34), Math.toRadians(270))
-//                .splineToConstantHeading(new Vector2d( 35, -34), Math.toRadians(90))
-//
-//                .splineToConstantHeading(new Vector2d(35, -15), Math.toRadians(90))
-//                .splineToConstantHeading(new Vector2d(47, -15), Math.toRadians(270))
-//                .lineToY(-60)
-//
-//
-//                .lineToY(-15)
-//                .splineToConstantHeading(new Vector2d(55, -15), Math.toRadians(270))
-//                .lineToY(-60)
-//                .turnTo(Math.toRadians(180))
-//                .build()
-//            );
+////                    drive.actionBuilder(new Pose2d(4, -32, Math.toRadians(270)))
+////                .splineToConstantHeading(new Vector2d(4, -34), Math.toRadians(270))
+////                .splineToConstantHeading(new Vector2d( 35, -34), Math.toRadians(90))
+////
+////                .splineToConstantHeading(new Vector2d(35, -15), Math.toRadians(90))
+////                .splineToConstantHeading(new Vector2d(47, -15), Math.toRadians(270))
+////                .lineToY(-60)
+////
+////
+////                .lineToY(-15)
+////                .splineToConstantHeading(new Vector2d(55, -15), Math.toRadians(270))
+////                .lineToY(-60)
+////                .turnTo(Math.toRadians(180))
+////                .build()
+////            );
         }
     }
 }

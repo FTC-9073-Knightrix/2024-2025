@@ -53,7 +53,7 @@ public abstract class AutoMethods extends LinearOpMode {
     //Create the orientation variable for the robot position
     public YawPitchRollAngles orientation;
 
-    int specimenAboveChamberHeight = -2287;
+    int specimenAboveChamberHeight = -2190;
     int specimenHookedOntoChamberHeight = -1600;
     public void initRobot() {
         runtime = new ElapsedTime();

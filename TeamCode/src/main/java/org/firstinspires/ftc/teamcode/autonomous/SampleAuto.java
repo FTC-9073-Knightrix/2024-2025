@@ -37,8 +37,8 @@ public class SampleAuto extends AutoMethods{
                 .strafeToConstantHeading(new Vector2d(-35, -25))
                 .strafeToConstantHeading(new Vector2d(-35, -10))
                 .build();
-        Action action4 = drive.actionBuilder(new Pose2d(35, -10, Math.toRadians(180)))
-                .strafeToConstantHeading(new Vector2d(-26, -10))
+        Action action4 = drive.actionBuilder(new Pose2d(-35, -10, Math.toRadians(180)))
+                .strafeToConstantHeading(new Vector2d(-21, -10))
                 .build();
 
         if (opModeInInit()) {
@@ -63,7 +63,7 @@ public class SampleAuto extends AutoMethods{
 //                basketRotation = Range.clip(basketRotation, 0.0, 1.0) + 0.05;
 //                basketServo.setPosition(basketRotation);
 //            }
-            basketServo.setPosition(1.0); // lvl 1 ascend
+            basketServo.setPosition(0.75); // lvl 1 ascend
             Actions.runBlocking(new SequentialAction(action4));
         }
 
