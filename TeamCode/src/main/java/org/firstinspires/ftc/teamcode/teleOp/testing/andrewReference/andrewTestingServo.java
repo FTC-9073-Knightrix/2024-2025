@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleOp.testing.andrewReference;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 
 
 @TeleOp(name="andrewTestingServo")
+@Disabled
 public class andrewTestingServo extends OpMode {
     public CRServo servo;
 

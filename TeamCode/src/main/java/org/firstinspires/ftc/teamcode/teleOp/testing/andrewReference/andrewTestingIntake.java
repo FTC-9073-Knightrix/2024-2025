@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.testing.andrewReference;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import java.util.Date;
 @TeleOp(name="andrewTestingIntake")
+@Disabled
 public class andrewTestingIntake extends OpMode {
     DcMotor intake;
     DcMotorEx intake2; // diff type of motor with setVelocity(ticks/s) method

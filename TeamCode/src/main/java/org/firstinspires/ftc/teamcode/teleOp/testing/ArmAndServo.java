@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleOp.testing;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 // TODO Prevent overextension and under-extension of linearSlides
 // TODO Make a default position for the Arm to get it out the way of the bucket and off the floor
 @TeleOp(name="ArmAndServo")
+@Disabled // Unused Opmode
 public class ArmAndServo extends OpMode {
     //Drive train speeds
     final double driveSpeed = 0.66;

@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleOp.testing;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "Intake Test")
+@Disabled // Unused Opmode
 public class testingIntake extends OpMode {
     public DcMotor intake;
 

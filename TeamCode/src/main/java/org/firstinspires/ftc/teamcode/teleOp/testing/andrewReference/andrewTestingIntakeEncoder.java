@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.teleOp.testing.andrewReference;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "andrewTestingIntakeEncoder")
+@Disabled
 public class andrewTestingIntakeEncoder extends OpMode {
     DcMotor intake;
     double ticks = 1000.0;

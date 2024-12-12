@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.teleOp;
+package org.firstinspires.ftc.teamcode.teleOp.decemberComp;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name = "IntoTheDeep TeleOp 24-25")
+@TeleOp(name = "IntoTheDeep TeleOp 24-25 (Gathersburg)")
 public class TeleOpMode extends TeleOpMethods {
     boolean libCode = false;
     @Override
