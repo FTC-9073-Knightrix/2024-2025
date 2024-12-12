@@ -8,6 +8,9 @@ public class TeleOpMode extends TeleOpMethods {
     @Override
     public void loop() {
         runMecanumDrive();
+        runClawIntake();
+        runClawOuttake();
+        runLeadScrew();
     }
 }
 

@@ -22,15 +22,17 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public Motor rightBack;
 
     // Electronics
-    public DcMotorEx intakeMotor;
-    public DcMotor vertLinearMotor;
+    public DcMotorEx vertLinearMotorL;
+    public DcMotorEx vertLinearMotorR;
     public DcMotor horizLinearMotor;
     public DcMotor hangerMotor;
 
-    public Servo armServo;
-    public Servo clawServo;
-    public Servo basketServo;
-    public Servo latchServo;
+    public Servo intakeClawServo;
+    public Servo intakeTwistServo;
+    public Servo intakeArmServo;
+
+    public Servo outtakeClawServo;
+    public Servo outtakeArmServo;
 
     public TouchSensor vertSlideSensor;
     public TouchSensor horizSlideSensor;
@@ -49,20 +51,21 @@ public abstract class TeleOpHardwareMap extends OpMode {
         // --------------------------------------- INITIALIZATION ---------------------------------------
         telemetry.addData("Initialization","Starting...");
 
-        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor"); // Expansion Hub Motor 0
-        vertLinearMotor = hardwareMap.dcMotor.get("vertLinearMotor"); // Expansion Hub Motor 1
-        horizLinearMotor = hardwareMap.dcMotor.get("horizLinearMotor"); // Expansion Hub Motor 2
-        hangerMotor = hardwareMap.dcMotor.get("hangerMotor"); // Expansion Hub Motor 3
+        vertLinearMotorL = hardwareMap.get(DcMotorEx.class, "vertLinearMotorL");
+        vertLinearMotorR = hardwareMap.get(DcMotorEx.class, "vertLinearMotorR");
+        horizLinearMotor = hardwareMap.get(DcMotor.class, "horizLinearMotor");
 
-        armServo = hardwareMap.servo.get("armServo"); // Control Hub Servo 0
-        clawServo = hardwareMap.servo.get("clawServo"); // Control Hub Servo  1
-        basketServo = hardwareMap.servo.get("basketServo"); // Control Hub Servo 2
-        latchServo = hardwareMap.servo.get("latchServo"); // Control Hub Servo 3
+        intakeClawServo = hardwareMap.get(Servo.class, "intakeClawServo");
+        intakeTwistServo = hardwareMap.get(Servo.class, "intakeTwistServo");
+        intakeArmServo = hardwareMap.get(Servo.class, "intakeArmServo");
 
-        vertSlideSensor = hardwareMap.touchSensor.get("vertSlideSensor"); // Control Hub Digital 0
-        horizSlideSensor = hardwareMap.touchSensor.get("horizSlideSensor"); // Control Hub Digital 1
-        hangerSensor1 = hardwareMap.touchSensor.get("hangerSensor1"); // Control Hub Digital 2
-        hangerSensor2 = hardwareMap.touchSensor.get("hangerSensor2"); // Control Hub Digital 3
+        outtakeClawServo = hardwareMap.get(Servo.class, "outtakeClawServo");
+        outtakeArmServo = hardwareMap.get(Servo.class, "outtakeArmServo");
+
+        vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
+        horizSlideSensor = hardwareMap.get(TouchSensor.class, "horizSlideSensor");
+        hangerSensor1 = hardwareMap.get(TouchSensor.class, "hangerSensor1");
+        hangerSensor2 = hardwareMap.get(TouchSensor.class, "hangerSensor2");
 
         leftFront = new Motor(hardwareMap, "LF"); // Control Hub Motor Port 0
         leftBack = new Motor(hardwareMap, "LB"); // Control Hub Motor Port 1
@@ -84,7 +87,8 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-        vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        vertLinearMotorL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        vertLinearMotorR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Initialization","Done!");

@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 @Config
-public abstract class TeleOpMethods extends OpMode {
+public abstract class OldTeleOpMethods extends OpMode {
     // ------------------------------------ TELEOP VARIABLES ------------------------------------
     //Drive train speeds
     final double driveSpeed = 0.66;

@@ -3,12 +3,30 @@ package org.firstinspires.ftc.teamcode.teleOp.januaryComp;
 import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 @Config
 public abstract class TeleOpMethods extends TeleOpHardwareMap {
+    // ENUMS & VARIABLES FOR FINITE STATE MACHINE
+    public enum IntakeState {
+        INTAKE_START,
+        INTAKE_PICKUP,
+        INTAKE_RETRACT
+    }
+    IntakeState intakeState = IntakeState.INTAKE_START;
+    ElapsedTime intakeTimer = new ElapsedTime();
+    public enum OuttakeState {
+        OUTTAKE_START,
+        OUTTAKE_PICKUP,
+        OUTTAKE_LIFT,
+        OUTTAKE_DUMP,
+        OUTTAKE_RETRACT
+    }
+    OuttakeState outtakeState = OuttakeState.OUTTAKE_START;
+    ElapsedTime outtakeTimer = new ElapsedTime();
+
     // ------------------------------------ TELEOP VARIABLES ------------------------------------
     //Drive train speeds
     final double driveSpeed = 0.66;
@@ -21,46 +39,16 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double armDefaultPos = 0.5;
     double armAtBasketPos = 0.05;
 
-    double armRot = armDefaultPos; // start the arm halfway
-    double basketRot = 0.0;
-    double latchRot = 1.0;
-    double clawRot = 0.2;
-
     //Motor variables
     int liftPosHoriz = 0;
     int liftPosAdjHoriz = 0;
-    int maximumHorizExtend; // TODO add when magnet sensor mounted
     double horizLinearPower = 0.0;
 
     int liftPosVert = 0;
     int liftPosAdjVert = 0;
-    int maximumVertExtend = 3600;
+    final double maximumVertExtend = 3600;
     double vertLinearPower = 0.0;
-
-    double intakePower = 0.0;
-
-    double hangerPower = 0.0;
-
-    // Gamepad Conditionals
-    boolean clickedA = false;
-    boolean startHanging = false;
-    boolean latchManualToggle = false;
-    boolean clawOpen = true;
-
     boolean robotCentric = false;
-
-    //Automated time variables
-
-    double autoIntakeCurrent1 = Double.MAX_VALUE;
-    double autoIntakeCurrent2 = Double.MAX_VALUE;
-    double autoIntakeCurrent3 = Double.MAX_VALUE;
-
-    double basketDropCurrent1 = Double.MAX_VALUE;
-    double basketDropCurrent2 = Double.MAX_VALUE;
-    double basketDropCurrent3 = Double.MAX_VALUE;
-    double basketDropCurrent4 = Double.MAX_VALUE;
-
-    double latchCurrent1 =  Double.MAX_VALUE;
 
     public void runMecanumDrive(){
         // ---------------------------------------MECANUM DRIVE ---------------------------------------
@@ -108,12 +96,57 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         robotCentric = false;
     }
 
+    public void runClawIntake() {
+        // --------------------------------------- CLAW INTAKE ---------------------------------------
+        // TODO FILL OUT OUTTAKE STATE MACHINE
+        switch (intakeState) {
+            case INTAKE_START:
+                break;
+            case INTAKE_PICKUP:
+                break;
+            case INTAKE_RETRACT:
+                break;
+            default:
+                // should never be reached, as intakeState should never be null
+                intakeState = IntakeState.INTAKE_START;
+        }
+    }
+
+    public void runClawOuttake() {
+        // --------------------------------------- CLAW OUTTAKE ---------------------------------------
+        // TODO FILL OUT OUTTAKE STATE MACHINE
+        switch (outtakeState) {
+            case OUTTAKE_START:
+                break;
+            case OUTTAKE_PICKUP:
+                break;
+            case OUTTAKE_LIFT:
+                break;
+            case OUTTAKE_DUMP:
+                break;
+            case OUTTAKE_RETRACT:
+                break;
+            default:
+                // should never be reached, as outtakeStart should never be null
+                outtakeState = OuttakeState.OUTTAKE_START;
+        }
+    }
+
+    public void runLeadScrew() {
+        // --------------------------------------- LEAD SCREW ---------------------------------------
+        // TODO FILL OUT LEAD SCREW CODE
+
+    }
+
+    public void updateAttachments() {
+        // ----------------------------------- UPDATE ATTACHMENTS -----------------------------------
+
+    }
+
     @SuppressLint("DefaultLocale")
     public void addTelemetryToDriverStation() {
         telemetry.addData("Runtime", getRuntime());
         telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
-        telemetry.addData("Vertical, True", liftPosVert + ", " + vertLinearMotor.getCurrentPosition());
-        telemetry.addData("Horizontal, True", liftPosHoriz + ", " + horizLinearMotor.getCurrentPosition());
         telemetry.addData("Gyro: ", "Yaw: " + String.format("%.2f", orientation.getYaw(AngleUnit.DEGREES))
                 + "Roll: " + String.format("%.2f", orientation.getRoll(AngleUnit.DEGREES))
                 + "Pitch: " + String.format("%.2f", orientation.getPitch(AngleUnit.DEGREES)));
