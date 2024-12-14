@@ -38,6 +38,7 @@ public class ParallelActionsTest extends CustomActions{
         // Robot drives to the observation zone to pick up the 2nd spec
         TrajectoryActionBuilder ToObsvTraj1 = PushBlocksTraj.endTrajectory().fresh();
 
+        // Starts repeating
         // Robot drives to the chamber to hook 2nd Spec
         TrajectoryActionBuilder ToBarTraj2 = ToObsvTraj1.endTrajectory().fresh();
 
