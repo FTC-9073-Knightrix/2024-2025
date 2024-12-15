@@ -1,12 +1,10 @@
-package com.example.meepmeep1x;
+package com.example.meepmeep1x.decembercomp;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
-
-import kotlin.math.UMathKt;
 
 public class MeepMeepYSampleRedAllianceAuto {
 
