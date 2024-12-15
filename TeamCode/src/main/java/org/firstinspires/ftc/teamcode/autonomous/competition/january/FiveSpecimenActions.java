@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.autonomous.testing;
+package org.firstinspires.ftc.teamcode.autonomous.competition.january;
 
-import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -15,7 +14,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
 @Config
-public abstract class CustomActions extends LinearOpMode {
+public abstract class FiveSpecimenActions extends LinearOpMode {
     final public int liftUpHeight = -2200;
     final public int liftOffWallHeight = -500;
     final public int hookHeight = -2300;
