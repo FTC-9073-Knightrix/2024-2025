@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleOp.testing.andrewReference;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 // Testing the Distance Sensor
 // When distance from sensor is less than 10 cm -> prevent driver from spinning motor
 @TeleOp(name = "DistanceSensorTest")
+@Disabled
 public class DistanceSensorTest extends OpMode {
     DcMotor motor;
     DistanceSensor distance;

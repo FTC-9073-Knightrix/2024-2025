@@ -9,10 +9,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 
 @TeleOp(name = "DistSensorTestNew")
 class DistSensorTestNew : OpMode() {
-    private lateinit var motor: DcMotor
-    private lateinit var servo: Servo
-    private lateinit var distance: DistanceSensor
-    var tooClose: Boolean = false
+    lateinit var motor: DcMotor
+    lateinit var servo: Servo
+    lateinit var distance: DistanceSensor
+    var tooClose = false
+    var tooFar = false
 
     override fun init() {
         motor = hardwareMap.dcMotor.get("motor") // 0
@@ -24,27 +25,30 @@ class DistSensorTestNew : OpMode() {
 
     override fun loop() {
         telemetry.addData("Distance (cm):", distance.getDistance(DistanceUnit.CM))
-        telemetry.addData("Distance (mm):", distance.getDistance(DistanceUnit.MM))
-        telemetry.addData("Distance (in):", distance.getDistance(DistanceUnit.INCH))
+//        telemetry.addData("Distance (mm):", distance.getDistance(DistanceUnit.MM))
+//        telemetry.addData("Distance (in):", distance.getDistance(DistanceUnit.INCH))
         telemetry.addData("Too close:", tooClose)
+        telemetry.addData("Too far:", tooFar)
         telemetry.update()
 
-        tooClose = (distance.getDistance(DistanceUnit.CM) < 4)
+        tooClose = (distance.cm() < 4)
+        tooFar = (distance.cm() > 5)
 
-        if (cm(distance) < 4) {
-            motor.power = -0.5;
-        } else if (cm(distance) > 10) {
-            motor.power = 0.5;
+        if (tooClose) {
+            motor.power = -0.2;
+        } else if (tooFar) {
+            motor.power = 0.2;
         } else {
-            stopMotor()
+            motor.stop()
         }
     }
 
-    private fun stopMotor() {
-        motor.power = 0.0
+    // Extension methods
+    fun DcMotor.stop() {
+        power = 0.0
     }
 
-    private fun cm(distanceSensor: DistanceSensor): Double {
-        return distanceSensor.getDistance(DistanceUnit.CM)
+    fun DistanceSensor.cm(): Double {
+        return getDistance(DistanceUnit.CM)
     }
 }
