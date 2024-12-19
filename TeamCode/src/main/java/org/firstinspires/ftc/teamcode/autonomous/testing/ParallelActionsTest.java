@@ -5,212 +5,103 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @Config
-public abstract class ParallelActionsTest extends LinearOpMode {
-    final public int liftUpHeight = -2200;
-    final public int liftOffWallHeight = -500;
-    final public int hookHeight = -2300;
-    final public double clawOpenPosition = 1.0; // TODO CHANGE VALUES ACCORDINGLY
-    final public double clawClosePosition = 0.0;
+public  class ParallelActionsTest extends LinearOpMode {
+    @Override
+    public void runOpMode() throws InterruptedException {
+        waitForStart();
+        TestMotor motor = new TestMotor(hardwareMap);
+        TestServo servo = new TestServo(hardwareMap);
 
-    final public double clawArmForwardPosition = 0.0;
-    final public double clawArmBackPosition = 1.0;
+        if (opModeIsActive()) {
+            if (isStopRequested()) return;
 
-    public TouchSensor liftSensor = hardwareMap.touchSensor.get("liftSensor");
-
-    // --------------------------------- VERT LIFT ----------------------------------
-    public class VertLift {
-        private final DcMotorEx liftMotor;
-
-        public VertLift(HardwareMap hardwareMap) {
-            liftMotor = hardwareMap.get(DcMotorEx.class, "liftMotor");
-            liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
-
-        public class LiftUp implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setTargetPosition(liftUpHeight);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-                if (liftMotor.isBusy() && !isStopRequested()) {
-                    return true;
-                } else {
-                    liftMotor.setPower(0);
-                    return false;
-                }
-            }
-        }
-        public Action liftUpToChamber() {
-            return new LiftUp();
-        }
-
-        public class HookOnBar implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setTargetPosition(hookHeight);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-                if (liftMotor.isBusy() && !isStopRequested()) {
-                    return true;
-                } else {
-                    liftMotor.setPower(0);
-                    return false;
-                }
-            }
-
-        }
-        public Action hookOnBar() {
-            return new HookOnBar();
-        }
-
-        public class LiftDown implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    liftMotor.setPower(-0.8);
-                    initialized = true;
-                }
-                packet.put("liftPos", liftMotor.getCurrentPosition());
-                if (!liftSensor.isPressed() && !isStopRequested()) {
-                    return true;
-                } else {
-                    liftMotor.setPower(0);
-                    liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    return false;
-                }
-            }
-        }
-        public Action liftDown() {
-            return new LiftDown();
-        }
-
-        public class LiftOffWall implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setPower(-0.8);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-                if (liftMotor.isBusy() && !isStopRequested()) {
-                    return true;
-                } else {
-                    liftMotor.setPower(0);
-                    return false;
-                }
-            }
-        }
-        public Action liftOffWall() {
-            return new LiftOffWall();
+            Actions.runBlocking(
+                    new ParallelAction(
+                            motor.drive(),
+                            new SequentialAction(
+                                servo.open(),
+                                servo.close(),
+                                servo.open()
+                            )
+                    )
+            );
         }
     }
 
     // TEST MOTOR
-    public class Motor {
+    public class TestMotor {
         private final DcMotorEx motor;
 
-        public Motor(HardwareMap hardwareMap) {
+        public TestMotor(HardwareMap hardwareMap) {
             motor = hardwareMap.get(DcMotorEx.class, "motor");
         }
 
-        public void drive(double power, double time) {
-            motor.setPower(power);
+        public class Drive implements Action {
+            private boolean initialized = false;
+            private final ElapsedTime timer = new ElapsedTime();
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motor.setTargetPosition(2000);
+                    motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    initialized = true;
+                }
+                if (timer.time() < 5 && !isStopRequested()) {
+                    motor.setPower(0.5);
+                    return true;
+                } else {
+                    motor.setPower(0);
+                    return false;
+                }
+            }
+        }
+        public Action drive() {
+            return new Drive();
         }
     }
 
-    // ----------------------------------- CLAW -----------------------------------
-    public class OuttakeClaw {
-        private final Servo clawServo;
+    // TEST SERVO
+    public class TestServo {
+        private final Servo servo;
 
-        public OuttakeClaw(HardwareMap hardwareMap) {
-            clawServo = hardwareMap.get(Servo.class, "outtakeClawServo");
+        public TestServo(HardwareMap hardwareMap) {
+            servo = hardwareMap.get(Servo.class, "servo");
         }
 
-        public void setPos(double pos) {clawServo.setPosition(Range.clip(pos, 0, 1));}
-
-        public class OpenClaw implements Action {
+        public class Open implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawServo.setPosition(clawOpenPosition);
+                servo.setPosition(0.0);
                 return false;
             }
         }
-        public Action openClaw() {
-            return new OpenClaw();
+        public Action open() {
+            return new Open();
         }
-
-        public class CloseClaw implements Action {
+        public class Close implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawServo.setPosition(clawClosePosition);
+                servo.setPosition(1.0);
                 return false;
             }
         }
-        public Action closeClaw() {
-            return new CloseClaw();
-        }
-    }
-
-
-    // --------------------------------- CLAW ARM ---------------------------------
-    public class ClawArm {
-        final private Servo clawArmServo;
-
-        public ClawArm(HardwareMap hardwareMap) {
-            clawArmServo = hardwareMap.get(Servo.class, "outtakeArmServo");
-            clawArmServo.setPosition(clawArmForwardPosition);
-        }
-
-        public void setPos(double pos) {
-            clawArmServo.setPosition(Range.clip(pos, 0.0, 1.0));
-        }
-
-        public class ClawArmForward implements Action {
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                clawArmServo.setPosition(clawArmForwardPosition);
-                return false;
-            }
-        }
-        public Action clawArmForward() {
-            return new ClawArmForward();
-        }
-
-        public class ClawArmBack implements Action {
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                clawArmServo.setPosition(clawArmBackPosition);
-                return false;
-            }
-        }
-        public Action clawArmBack() {
-            return new ClawArmBack();
+        public Action close() {
+            return new Close();
         }
     }
 }
