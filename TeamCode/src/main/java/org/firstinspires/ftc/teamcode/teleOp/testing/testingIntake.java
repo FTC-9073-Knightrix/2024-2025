@@ -13,7 +13,7 @@ public class testingIntake extends OpMode {
 
     @Override
     public void init() {
-        intake = hardwareMap.dcMotor.get("intake");
+        intake = hardwareMap.dcMotor.get("motor");
     }
 
     @Override

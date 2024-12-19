@@ -13,12 +13,12 @@ import org.firstinspires.ftc.teamcode.autonomous.MecanumDrive;
 
 @Autonomous(name = "ParallelActionsTest", group = "Autonomous")
 public class FiveSpecimenAuto extends FiveSpecimenActions {
+    final double forwardAngle = Math.toRadians(90);
+    final double backwardAngle = Math.toRadians(270);
+    final double rightAngle = Math.toRadians(0);
+    final double leftAngle = Math.toRadians(180);
     @Override
     public void runOpMode() throws InterruptedException {
-        final double forwardAngle = Math.toRadians(90);
-        final double backwardAngle = Math.toRadians(270);
-        final double rightAngle = Math.toRadians(0);
-        final double leftAngle = Math.toRadians(180);
 
         Pose2d beginPose = new Pose2d(-8, -62, forwardAngle);
         MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);

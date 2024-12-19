@@ -22,8 +22,8 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public Motor rightBack;
 
     // Electronics
-    public DcMotorEx vertLinearMotorL;
-    public DcMotorEx vertLinearMotorR;
+    public DcMotorEx vertLinearMotor;
+//    public DcMotorEx vertLinearMotorR;
     public DcMotor horizLinearMotor;
     public DcMotor hangerMotor;
 
@@ -32,6 +32,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public Servo intakeArmServo;
 
     public Servo outtakeClawServo;
+    public Servo outtakeTwistServo;
     public Servo outtakeArmServo;
 
     public TouchSensor vertSlideSensor;
@@ -51,8 +52,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
         // --------------------------------------- INITIALIZATION ---------------------------------------
         telemetry.addData("Initialization","Starting...");
 
-        vertLinearMotorL = hardwareMap.get(DcMotorEx.class, "vertLinearMotorL");
-        vertLinearMotorR = hardwareMap.get(DcMotorEx.class, "vertLinearMotorR");
+        vertLinearMotor = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
         horizLinearMotor = hardwareMap.get(DcMotor.class, "horizLinearMotor");
 
         intakeClawServo = hardwareMap.get(Servo.class, "intakeClawServo");
@@ -61,6 +61,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
         outtakeClawServo = hardwareMap.get(Servo.class, "outtakeClawServo");
         outtakeArmServo = hardwareMap.get(Servo.class, "outtakeArmServo");
+        outtakeTwistServo = hardwareMap.get(Servo.class, "outtakeTwistServo");
 
         vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
         horizSlideSensor = hardwareMap.get(TouchSensor.class, "horizSlideSensor");
@@ -87,8 +88,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
-        vertLinearMotorL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        vertLinearMotorR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Initialization","Done!");

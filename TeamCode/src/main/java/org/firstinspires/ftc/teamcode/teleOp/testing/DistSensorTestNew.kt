@@ -24,15 +24,13 @@ class DistSensorTestNew : OpMode() {
     }
 
     override fun loop() {
-        telemetry.addData("Distance (cm):", distance.getDistance(DistanceUnit.CM))
-//        telemetry.addData("Distance (mm):", distance.getDistance(DistanceUnit.MM))
-//        telemetry.addData("Distance (in):", distance.getDistance(DistanceUnit.INCH))
+        telemetry.addData("Distance (mm):", distance.mm())
         telemetry.addData("Too close:", tooClose)
         telemetry.addData("Too far:", tooFar)
         telemetry.update()
 
-        tooClose = (distance.cm() < 4)
-        tooFar = (distance.cm() > 5)
+        tooClose = (distance.mm() < 4)
+        tooFar = (distance.mm() > 5)
 
         if (tooClose) {
             motor.power = -0.2;
@@ -48,7 +46,7 @@ class DistSensorTestNew : OpMode() {
         power = 0.0
     }
 
-    fun DistanceSensor.cm(): Double {
-        return getDistance(DistanceUnit.CM)
+    fun DistanceSensor.mm(): Double {
+        return getDistance(DistanceUnit.MM)
     }
 }
