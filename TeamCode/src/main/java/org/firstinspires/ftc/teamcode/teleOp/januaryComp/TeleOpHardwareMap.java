@@ -6,7 +6,9 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
@@ -23,7 +25,6 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
     // Electronics
     public DcMotorEx vertLinearMotor;
-//    public DcMotorEx vertLinearMotorR;
     public DcMotor horizLinearMotor;
     public DcMotor hangerMotor;
 
@@ -38,7 +39,10 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public TouchSensor vertSlideSensor;
     public TouchSensor horizSlideSensor;
     public TouchSensor hangerSensor1;
-    public TouchSensor hangerSensor2;
+
+    // Both the color sensor and intake distance sensor are on the REV Color Sensor V3
+    public NormalizedColorSensor colorSensor;
+    public DistanceSensor intakeDistanceSensor;
 
     //Create the gyroscope
     public IMU imu;
@@ -66,7 +70,9 @@ public abstract class TeleOpHardwareMap extends OpMode {
         vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
         horizSlideSensor = hardwareMap.get(TouchSensor.class, "horizSlideSensor");
         hangerSensor1 = hardwareMap.get(TouchSensor.class, "hangerSensor1");
-        hangerSensor2 = hardwareMap.get(TouchSensor.class, "hangerSensor2");
+
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        intakeDistanceSensor = hardwareMap.get(DistanceSensor.class, "intakeDistanceSensor");
 
         leftFront = new Motor(hardwareMap, "LF"); // Control Hub Motor Port 0
         leftBack = new Motor(hardwareMap, "LB"); // Control Hub Motor Port 1

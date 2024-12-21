@@ -11,6 +11,9 @@ public class TeleOpMode extends TeleOpMethods {
         runClawIntake();
         runClawOuttake();
         runLeadScrew();
+        getColors();
+        updateAttachments();
+        addTelemetryToDriverStation();
     }
 }
 
