@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleOp.januaryComp;
 
-import android.graphics.Color;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -15,20 +13,26 @@ import java.util.Locale;
 
 @Config
 public abstract class TeleOpMethods extends TeleOpHardwareMap {
+    @Override
+    public void init() {
+        super.init();
+    }
     // Intake Finite State Machine
     protected class IntakeFSM {
         private IntakeState state;
         public ElapsedTime timer;
+        public boolean justSwitched;
 
         public enum IntakeState {
-            INTAKE_START,
-            INTAKE_PICKUP,
-            INTAKE_RETRACT
+            DEFAULT,
+            PICKUP,
+            TRANSFER
         }
 
         public IntakeFSM() {
-            state = IntakeState.INTAKE_START;
+            state = IntakeState.DEFAULT;
             timer = new ElapsedTime();
+            justSwitched = true;
         }
 
         public IntakeState getState () {return state;}
@@ -40,6 +44,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     protected class OuttakeFSM {
         private OuttakeState state;
         public ElapsedTime timer;
+        public boolean justSwitched;
 
         public enum OuttakeState {
             DEFAULT,
@@ -53,6 +58,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         public OuttakeFSM() {
             state = OuttakeState.DEFAULT;
             timer = new ElapsedTime();
+            justSwitched = true;
         }
 
         public OuttakeState getState() {return state;}
@@ -60,13 +66,6 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
     OuttakeFSM outtakeFSM = new OuttakeFSM();
 
-    protected class SpecimenFSM {
-        private SpecimenState state;
-
-        public enum SpecimenState {
-            GRAB
-        }
-    }
     // ------------------------------------ TELEOP VARIABLES ------------------------------------
     // Drive train speeds
     final double driveSpeed = 0.66;
@@ -80,8 +79,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double intakeClawServoRot = 0.0;
     double intakeTwistServoRot = 0.0;
 
-    final double INTAKE_ARM_DOWN_POS = 0.0;
-    final double INTAKE_ARM_DEFAULT_POS = 0.5;
+    final double INTAKE_CLAW_CLOSE = 0.6;
+    final double INTAKE_CLOW_OPEN = 1.0;
+
+    final double INTAKE_ARM_DOWN = 0.0;
+    final double INTAKE_ARM_DEFAULT = 0.5;
     final double INTKAE_ARM_TRANSFER = 1.0;
 
     // Outtake variables
@@ -89,9 +91,9 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double outtakeClawServoRot = 0.0;
     double outtakeTwistServoRot = 0.0;
 
-    final double OUTTAKE_ARM_BACK_POS = 0.0;
-    final double OUTTAKE_ARM_HOOK_POS = 0.5;
-    final double OUTTAKE_ARM_DEFAULT_POS = 0.75;
+    final double OUTTAKE_ARM_BACK = 0.0;
+    final double OUTTAKE_ARM_HOOK = 0.5;
+    final double OUTTAKE_ARM_DEFAULT = 0.75;
     final double OUTTAKE_ARM_TRANSFER = 1.0;
 
     // Horiz Lift
@@ -110,19 +112,17 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double hangerPower = 0.0;
 
     // Intake Color Sensor
-    float gain = 22.0F;
-
-    /* Once per loop, we will update this hsvValues array. The first element (0) will contain the
-       hue, the second element (1) will contain the saturation, and the third element (2) will
-       contain the value. See http://web.archive.org/web/20190311170843/https://infohost.nmt.edu/tcc/help/pubs/colortheory/web/hsv.html
-       for an explanation of HSV color. */
-    final float[] hsvValues = new float[3];
+    final float minIntensity = 0.4F;
     NormalizedRGBA colors;
+    enum GameColors {RED, YELLOW, BLUE, NONE}
+    GameColors colorMatch = GameColors.NONE;
+    GameColors allianceColor; // MUST be initialized in Op Mode as only RED or BLUE
+
     // Mecanum
     boolean robotCentric = false;
 
+    // TODO ---------------------------------------MECANUM DRIVE ---------------------------------------
     public void runMecanumDrive(){
-        // ---------------------------------------MECANUM DRIVE ---------------------------------------
         //Setting boolean hold
         if(gamepad1.right_bumper) {
             //Slowmode
@@ -167,38 +167,59 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         robotCentric = false;
     }
 
+    // --------------------------------------- CLAW INTAKE ---------------------------------------
     public void runClawIntake() {
-        // --------------------------------------- CLAW INTAKE ---------------------------------------
         // TODO FILL OUT OUTTAKE STATE MACHINE
         switch (intakeFSM.state) {
-            case INTAKE_START:
-                intakeFSM.timer.reset();
+            case DEFAULT:
+                if (intakeFSM.justSwitched) {
+                    intakeFSM.timer.reset();
+                    intakeClawServoRot = INTAKE_CLOW_OPEN;
+                    intakeFSM.justSwitched = false;
+                }
+                runIntakeTwist();
+                runIntakeGrab();
+                if (gamepad2.a) {
+                    intakeFSM.setState(IntakeFSM.IntakeState.PICKUP);
+                    intakeFSM.justSwitched = true;
+                }
                 break;
-            case INTAKE_PICKUP:
-                intakeFSM.timer.reset();
+            case PICKUP:
+                if (intakeFSM.justSwitched) {
+                    intakeFSM.timer.reset();
+                    intakeFSM.justSwitched = false;
+                    if (!sampleColorIsAcceptable()) {
+                        intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
+                    }
+                }
                 break;
-            case INTAKE_RETRACT:
-                intakeFSM.timer.reset();
-                break;
+            case TRANSFER:
+                if (intakeFSM.justSwitched) {
+                    intakeFSM.timer.reset();
+                    intakeFSM.justSwitched = false;
+                }
             default:
                 // should never be reached, as intakeState should never be null
-                intakeFSM.setState(IntakeFSM.IntakeState.INTAKE_START);
+                intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
+                intakeFSM.justSwitched = true;
         }
     }
 
-    public void runClawSampleOuttake() {
-        // --------------------------------------- CLAW SAMPLE OUTTAKE ---------------------------------------
+    // --------------------------------------- CLAW OUTTAKE ---------------------------------------
+    public void runClawOuttake() {
         // TODO FILL OUT OUTTAKE STATE MACHINE
         switch (outtakeFSM.state) {
             case DEFAULT:
                 outtakeFSM.timer.reset();
                 break;
+
             case PICKUP:
                 outtakeFSM.timer.reset();
                 break;
             case LIFT:
                 outtakeFSM.timer.reset();
                 break;
+
             case DUMP:
                 outtakeFSM.timer.reset();
                 break;
@@ -216,6 +237,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     public void runClawSpecimens() {
         // --------------------------------------- CLAW SPECIMENS ---------------------------------------
     }
+
     public void horizontalSlideSystem() {
         // If the outtake claw extends behind the robot,
         if (outtakeFSM.state == OuttakeFSM.OuttakeState.DUMP) {
@@ -237,6 +259,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
         } else { horizLinearPower = 0.0;}
     }
+
     public void runLeadScrew() {
         // --------------------------------------- LEAD SCREW ---------------------------------------
         // TODO FILL OUT LEAD SCREW CODE
@@ -244,9 +267,34 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public void getColors() {
+        // Color sensor get the RGB values
         colors = colorSensor.getNormalizedColors();
-        Color.colorToHSV(colors.toColor(), hsvValues);
+        float redGreenDifference = Math.abs(colors.red-colors.green);
+
+        // Determine which color the robot sees
+
+        // (Red & Green -> Yellow)
+        // Checks that intense red & green are detected, and that they are about the same value -> Yellow color
+        if ((colors.red > minIntensity && colors.green > minIntensity) && redGreenDifference < 0.05) {
+            colorMatch = GameColors.YELLOW;
+        }
+        // Checks that intense red is detected, and that red value is greater than blue value -> Red color
+        else if ((colors.red > minIntensity && Math.max(colors.red, colors.blue) == colors.red)) {
+            colorMatch = GameColors.RED;
+        }
+        // Checks that intense blue is detected, and that blue value is greater than red value -> Blue color
+        else if ((colors.blue > minIntensity) && Math.max(colors.red, colors.blue) == colors.blue) {
+            colorMatch = GameColors.BLUE;
+        }
+        else {colorMatch = GameColors.NONE;}
     }
+
+    public boolean sampleColorIsAcceptable() {
+        boolean colorIsNotAnAllianceColor = (colorMatch != GameColors.RED && colorMatch != GameColors.BLUE);
+        boolean colorMatchesAllianceColor = (colorMatch == allianceColor);
+        return (colorIsNotAnAllianceColor || colorMatchesAllianceColor);
+    }
+
     public void updateAttachments() {
         // ----------------------------------- UPDATE ATTACHMENTS -----------------------------------
         intakeArmServoRot = Range.clip(intakeArmServoRot, 0.0, 1.0);
@@ -270,21 +318,22 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         hangerMotor.setPower(hangerPower);
     }
 
-    public void addTelemetryToDriverStation() {
-        telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
-        telemetry.addData("Gyro: ", "Yaw: " + String.format(Locale.US, "%.2f", orientation.getYaw(AngleUnit.DEGREES))
-                                                + "Roll: " + String.format(Locale.US, "%.2f", orientation.getRoll(AngleUnit.DEGREES))
-                                                + "Pitch: " + String.format(Locale.US, "%.2f", orientation.getPitch(AngleUnit.DEGREES)));
-        telemetry.addData("Slowmode: ", finalSlowMode);
-        telemetry.addData("Intake State:", intakeFSM.getState());
-        telemetry.addData("Outtake State:", outtakeFSM.getState());
-        telemetry.addLine()
-                .addData("Red", "%.3f", colors.red)
-                .addData("Green", "%.3f", colors.green)
-                .addData("Blue", "%.3f", colors.blue);
-        telemetry.addData("Distance", "%.3f", intakeDistanceSensor.getDistance(DistanceUnit.CM));
-        telemetry.update();
+    public void runIntakeTwist() {
+        if (gamepad2.left_bumper) {
+            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.01, 0.0, 1.0);
+        }
+        else if (gamepad2.right_bumper) {
+            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.01, 0.0, 1.0);
+        }
+    }
+
+    public void runIntakeGrab() {
+        if (gamepad2.right_trigger >= 0.75) intakeClawServoRot = INTAKE_CLAW_CLOSE;
+        else if (gamepad2.left_trigger >= 0.75) intakeClawServoRot = INTAKE_CLOW_OPEN;
+    }
+
+    public void runAutoIntakeTransfer() {
+        horizLinearPower = 0.0;
     }
 
     public double incrementServoRot(double currentRot, double amount, double min, double max) {
@@ -296,7 +345,30 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setTargetPosition(target);
         motor.setPower(power);
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void addTelemetryToDriverStation() {
+        telemetry.addData("Runtime", getRuntime());
+        telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
+        telemetry.addData("Gyro: ", "Yaw: " + String.format(Locale.US, "%.2f", orientation.getYaw(AngleUnit.DEGREES))
+                                                + "Roll: " + String.format(Locale.US, "%.2f", orientation.getRoll(AngleUnit.DEGREES))
+                                                + "Pitch: " + String.format(Locale.US, "%.2f", orientation.getPitch(AngleUnit.DEGREES)));
+        telemetry.addData("Slowmode: ", finalSlowMode);
+
+        telemetry.addData("Intake State:", intakeFSM.getState());
+        telemetry.addData("Intake Timer", intakeFSM.timer.time());
+
+        telemetry.addData("Outtake State:", outtakeFSM.getState());
+        telemetry.addData("Outtake Timer", outtakeFSM.timer.time());
+
+        telemetry.addLine()
+                .addData("Red", "%.3f", colors.red)
+                .addData("Green", "%.3f", colors.green)
+                .addData("Blue", "%.3f", colors.blue)
+                .addData("Color Match", colorMatch);
+        telemetry.addData("Distance", "%.3f", intakeDistanceSensor.getDistance(DistanceUnit.CM));
+
+        telemetry.update();
     }
 }
 

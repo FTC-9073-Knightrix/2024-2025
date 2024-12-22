@@ -42,6 +42,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
     // Both the color sensor and intake distance sensor are on the REV Color Sensor V3
     public NormalizedColorSensor colorSensor;
+    final float GAIN = 22.0F;
     public DistanceSensor intakeDistanceSensor;
 
     //Create the gyroscope
@@ -72,6 +73,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
         hangerSensor1 = hardwareMap.get(TouchSensor.class, "hangerSensor1");
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        colorSensor.setGain(GAIN);
         intakeDistanceSensor = hardwareMap.get(DistanceSensor.class, "intakeDistanceSensor");
 
         leftFront = new Motor(hardwareMap, "LF"); // Control Hub Motor Port 0
