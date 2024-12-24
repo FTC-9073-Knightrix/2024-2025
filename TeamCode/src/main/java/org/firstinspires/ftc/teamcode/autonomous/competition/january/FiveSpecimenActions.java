@@ -24,7 +24,11 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
     final public double clawArmForwardPosition = 0.0;
     final public double clawArmBackPosition = 1.0;
 
+    public static double heading = 0;
+
     public TouchSensor liftSensor = hardwareMap.touchSensor.get("liftSensor");
+
+//    public int cioqlnwqduhqw
 
     // --------------------------------- VERT LIFT ----------------------------------
     public class VertLift {

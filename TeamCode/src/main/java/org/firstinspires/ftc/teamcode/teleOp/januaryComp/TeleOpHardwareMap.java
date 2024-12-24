@@ -26,7 +26,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
     // Electronics
     public DcMotorEx vertLinearMotor;
     public DcMotor horizLinearMotor;
-    public DcMotor hangerMotor;
+//    public DcMotor hangerMotor;
 
     public Servo intakeClawServo;
     public Servo intakeTwistServo;
@@ -38,13 +38,15 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
     public TouchSensor vertSlideSensor;
     public TouchSensor horizSlideSensor;
-    public TouchSensor hangerSensor1;
+//    public TouchSensor hangerSensor1;
 
     // Both the color sensor and intake distance sensor are on the REV Color Sensor V3
     public NormalizedColorSensor colorSensor;
     final float GAIN = 22.0F;
     public DistanceSensor intakeDistanceSensor;
 
+    public boolean g2RightTriggerPressed = gamepad2.right_trigger > 0.5;
+    public boolean g2LeftTriggerPressed = gamepad2.left_trigger > 0.5;
     //Create the gyroscope
     public IMU imu;
 
@@ -70,11 +72,11 @@ public abstract class TeleOpHardwareMap extends OpMode {
 
         vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
         horizSlideSensor = hardwareMap.get(TouchSensor.class, "horizSlideSensor");
-        hangerSensor1 = hardwareMap.get(TouchSensor.class, "hangerSensor1");
+//        hangerSensor1 = hardwareMap.get(TouchSensor.class, "hangerSensor1");
 
         colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
         colorSensor.setGain(GAIN);
-        intakeDistanceSensor = hardwareMap.get(DistanceSensor.class, "intakeDistanceSensor");
+        intakeDistanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor"); // REV Color V3 has built in distance
 
         leftFront = new Motor(hardwareMap, "LF"); // Control Hub Motor Port 0
         leftBack = new Motor(hardwareMap, "LB"); // Control Hub Motor Port 1

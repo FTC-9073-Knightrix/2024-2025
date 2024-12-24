@@ -14,10 +14,12 @@ public class TeleOpModeRED extends TeleOpMethods {
     @Override
     public void loop() {
         runMecanumDrive();
+        getColors();
         runClawIntake();
         runClawOuttake();
         runLeadScrew();
-        getColors();
+        horizontalSlideSystem();
+        controlRumble();
         updateAttachments();
         addTelemetryToDriverStation();
     }

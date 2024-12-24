@@ -18,6 +18,8 @@ public class TeleOpModeBLUE extends TeleOpMethods {
         runClawOuttake();
         runLeadScrew();
         getColors();
+        horizontalSlideSystem();
+        controlRumble();
         updateAttachments();
         addTelemetryToDriverStation();
     }
