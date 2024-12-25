@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleOp.januaryComp;
 
+import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
+import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriverRR;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -13,11 +15,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.autonomous.PinpointDrive;
 
 public abstract class TeleOpHardwareMap extends OpMode {
     // ------------------------------------ HARDWARE MAP ------------------------------------
     //Drivetrain hardware
     MecanumDrive mecanumDrive;
+//    PinpointDrive pinpointDrive;
     public Motor leftFront;
     public Motor rightFront;
     public Motor leftBack;
@@ -48,7 +52,8 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public boolean g2RightTriggerPressed = gamepad2.right_trigger > 0.5;
     public boolean g2LeftTriggerPressed = gamepad2.left_trigger > 0.5;
     //Create the gyroscope
-    public IMU imu;
+//    public IMU imu;
+    public GoBildaPinpointDriver pinpoint;
 
     //Create the orientation variable for the robot position
     public YawPitchRollAngles orientation;
@@ -58,6 +63,13 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public void init() {
         // --------------------------------------- INITIALIZATION ---------------------------------------
         telemetry.addData("Initialization","Starting...");
+
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
+        // CHANGE ACCORDINGLY
+        pinpoint.setOffsets(190.5, 5.588);
 
         vertLinearMotor = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
         horizLinearMotor = hardwareMap.get(DcMotor.class, "horizLinearMotor");
@@ -88,17 +100,19 @@ public abstract class TeleOpHardwareMap extends OpMode {
         rightBack.setInverted(true);
 
         mecanumDrive = new MecanumDrive(leftFront, rightFront, leftBack, rightBack);
+//        pinpointDrive = new PinpointDrive()
 
-        //Add the gyroscope to the configuration on the phones
-        imu = hardwareMap.get(IMU.class, "imu");
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
-        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
-
-        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-
-        imu.initialize(new IMU.Parameters(orientationOnRobot));
+//        //Add the gyroscope to the configuration on the phones
+//        imu = hardwareMap.get(IMU.class, "imu");
+//        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+//        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+//
+//        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+//
+//        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Initialization","Done!");
