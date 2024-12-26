@@ -16,8 +16,8 @@ public class TeleOpModeRED extends TeleOpMethods {
         runMecanumDrive();
 
         getColors();
-        runClawIntake();
-        runClawOuttake();
+        runIntakeOuttake();
+        runSpecimens();
         runLeadScrew();
         horizontalSlideSystem();
         switchGameMode();

@@ -35,9 +35,13 @@ class HorizSlideAndClawTest: OpMode() {
 
     override fun loop() {
         telemetry.addData("Slide position", abs(horizLinearMotor.currentPosition))
+        telemetry.addData("Power, direction", horizLinearMotor.power)
         telemetry.addData("Intake Arm position", intakeArmServoRot)
         telemetry.addData("Distance", intakeDistanceSensor.getDistance(DistanceUnit.MM)
         )
+        horizLinearMotor.power = (-gamepad1.right_stick_y).toDouble()
+
+
         if (gamepad1.dpad_up) {
             intakeArmServoRot += 0.001
         }

@@ -15,10 +15,10 @@ public class TeleOpModeBLUE extends TeleOpMethods {
     public void loop() {
         runMecanumDrive();
 
-        runClawIntake();
-        runClawOuttake();
-        runLeadScrew();
         getColors();
+        runIntakeOuttake();
+        runSpecimens();
+        runLeadScrew();
         horizontalSlideSystem();
         switchGameMode();
         endGame();

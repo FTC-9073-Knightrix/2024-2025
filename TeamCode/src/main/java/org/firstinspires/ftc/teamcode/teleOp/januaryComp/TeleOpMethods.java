@@ -3,12 +3,10 @@ package org.firstinspires.ftc.teamcode.teleOp.januaryComp;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.Locale;
@@ -20,84 +18,77 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         super.init();
     // ------------------------------------ FINITE STATE MACHINES ------------------------------------
     }
-    // Intake Finite State Machine
-    protected class IntakeFSM {
-        private IntakeState state;
+    // Intake Outtake Transfer Finite State Machine
+    class IntakeOuttakeFSM {
+        private IntakeOuttakeState state;
         ElapsedTime timer;
         boolean slideWasJustRetracted;
         boolean clawClosedInitiated;
         private boolean justSwitched;
 
-        public enum IntakeState {
+        public enum IntakeOuttakeState {
             DEFAULT,
             PICKUP,
             SAMPLE_RETRACT,
             SPECIMEN_RETRACT,
-            TRANSFER
+            READY_TO_TRANSFER,
+            TRANSFER,
+            LIFT,
+            DUMP,
+            FLIP_BACK,
+            DESCENT,
         }
 
-        public IntakeFSM() {
-            state = IntakeState.DEFAULT;
+        public IntakeOuttakeFSM() {
+            state = IntakeOuttakeState.DEFAULT;
             timer = new ElapsedTime();
             justSwitched = true;
             slideWasJustRetracted = false;
             clawClosedInitiated = false;
         }
 
-        public IntakeState getState () {return state;}
-        public void setState (IntakeState state) {this.state = state;}
+        public IntakeOuttakeState getState () {return state;}
+        public void setState (IntakeOuttakeState state) {this.state = state;}
         public boolean justSwitched() {return justSwitched;}
         public void setJustSwitched(boolean b) {justSwitched = b;}
     }
-    IntakeFSM intakeFSM = new IntakeFSM();
+    IntakeOuttakeFSM intakeOuttakeFSM = new IntakeOuttakeFSM();
 
-    // Outtake Finite State Machine
-    protected class OuttakeFSM {
-        private OuttakeState state;
+    // SpecimenFinite State Machine
+    class SpecimenFSM {
+        private SpecimenState state;
         public ElapsedTime timer;
         public boolean justSwitched;
 
-        public enum OuttakeState {
-            DEFAULT,
-
-            // STATES FOR SAMPLE TRANSFER
-            READY_TO_PICKUP,
-            PICKUP,
-            LIFT,
-            DUMP,
-            FLIP_BACK,
-            DESCENT,
-
-            // STATES FOR SPECIMEN TRANSFER
-            READY_TO_GRAB_SPEC,
-            GRAB_AND_FLIP_SPEC,
-            SPECIMEN_HANG,
-            RETURN_TO_GRABBING
+        public enum SpecimenState {
+            READY_TO_GRAB,
+            GRAB_AND_FLIP,
+            SPECIMEN_HANG
         }
 
-        public OuttakeFSM() {
-            state = OuttakeState.DEFAULT;
+        public SpecimenFSM() {
+            state = SpecimenState.READY_TO_GRAB;
             timer = new ElapsedTime();
             justSwitched = true;
         }
 
-        public OuttakeState getState() {return state;}
-        public void setState(OuttakeState state) {this.state = state;}
+        public SpecimenState getState() {return state;}
+        public void setState(SpecimenState state) {this.state = state;}
         public boolean justSwitched() {return justSwitched;}
         public void setJustSwitched(boolean b) {justSwitched = b;}
     }
-    OuttakeFSM outtakeFSM = new OuttakeFSM();
+    SpecimenFSM specimenFSM = new SpecimenFSM();
 
     // ------------------------------------ TELEOP VARIABLES ------------------------------------
+    // Game variables
     enum GameMode {
         SAMPLE,
         SPECIMEN
     }
     GameMode gameMode = GameMode.SAMPLE;
-    // Game variables
     boolean initiatedEndGame = false;
     boolean allPressed = (g2RightTriggerPressed && g2LeftTriggerPressed && gamepad2.left_bumper && gamepad2.right_bumper);
-    double gameModeCurrent = Double.MAX_VALUE;
+    boolean allPreviouslyPressed = false;
 
     // Drive train speeds
     final double driveSpeed = 0.66;
@@ -135,13 +126,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     int liftPosAdjHoriz = 0;
     double horizLinearPower = 0.0;
     final int HORIZ_MAX = 2000;
-    final int TRANSFER_TARGET = 100;
 
     // Vert Lift
     int liftPosVert = 0;
     int liftPosAdjVert = 0;
     double vertLinearPower = 0.0;
     final int VERT_MAX = 3600;
+    final int TRANSFER_TARGET = 100;
 
     // Hanger
     double hangerPower = 0.0;
@@ -208,56 +199,56 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         robotCentric = false;
     }
 
-    // --------------------------------------- CLAW INTAKE ---------------------------------------
-    public void runClawIntake() {
-        switch (intakeFSM.getState()) {
+    // --------------------------------------- INTAKE AND OUTTAKE (SAMPLES) ---------------------------------------
+    public void runIntakeOuttake() {
+        switch (intakeOuttakeFSM.getState()) {
             // --------------------------------------- DEFAULT ---------------------------------------
             case DEFAULT:
-                if (intakeFSM.justSwitched()) {
-                    intakeFSM.timer.reset();
+                if (intakeOuttakeFSM.justSwitched()) {
+                    intakeOuttakeFSM.timer.reset();
                     intakeArmServoRot = INTAKE_ARM_DEFAULT;
-                    intakeFSM.setJustSwitched(false);
+                    intakeOuttakeFSM.setJustSwitched(false);
                 }
 
                 runIntakeTwist();
                 if (runIntakeGrabbing().equals("GRAB")) {
-                    intakeFSM.setState(IntakeFSM.IntakeState.PICKUP);
-                    intakeFSM.setJustSwitched(true);
+                    intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.PICKUP);
+                    intakeOuttakeFSM.setJustSwitched(true);
                 }
                 break;
             // --------------------------------------- PICKUP ---------------------------------------
             case PICKUP:
-                if (intakeFSM.justSwitched()) {
-                    intakeFSM.timer.reset();
-                    intakeFSM.setJustSwitched(false);
+                if (intakeOuttakeFSM.justSwitched()) {
+                    intakeOuttakeFSM.timer.reset();
+                    intakeOuttakeFSM.setJustSwitched(false);
                 }
 
                 // Allow some time to let block get picked up
-                if (intakeFSM.timer.seconds() > 0.25) {
+                if (intakeOuttakeFSM.timer.seconds() > 0.25) {
                     intakeArmServoRot = INTAKE_ARM_DEFAULT;
 
                     if (useColorSensor) {
                         boolean rejectBlock = (!sampleColorIsAcceptable() || intakeDistanceSensor.getDistance(DistanceUnit.CM) > 1.5);
                         if (rejectBlock) {
                             intakeClawServoRot = INTAKE_CLAW_OPEN;
-                            intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT); // Return the claw back to default
-                            intakeFSM.setJustSwitched(true);
+                            intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT); // Return the claw back to default
+                            intakeOuttakeFSM.setJustSwitched(true);
                             break;
                         }
                     }
                     if (runIntakeGrabbing().equals("RELEASE")) {
-                        intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
-                        intakeFSM.setJustSwitched(true);
+                        intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT);
+                        intakeOuttakeFSM.setJustSwitched(true);
                         break;
                     }
                     if (gamepad2.a) {
                         if (gameMode == GameMode.SAMPLE) {
-                            intakeFSM.setState(IntakeFSM.IntakeState.SAMPLE_RETRACT);
+                            intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.SAMPLE_RETRACT);
                         }
                         else if (gameMode == GameMode.SPECIMEN) {
-                            intakeFSM.setState(IntakeFSM.IntakeState.SPECIMEN_RETRACT);
+                            intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT);
                         }
-                        intakeFSM.setJustSwitched(true);
+                        intakeOuttakeFSM.setJustSwitched(true);
                     }
                 }
                 break;
@@ -265,84 +256,64 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             // --------------------------------------- SAMPLE RETRACT ---------------------------------------
             case SAMPLE_RETRACT:
                 // Initiate the auto retraction of the slide and servos
-                if (intakeFSM.justSwitched()) {
-                    intakeFSM.timer.reset();
+                if (intakeOuttakeFSM.justSwitched()) {
+                    intakeOuttakeFSM.timer.reset();
                     pullIntakeBack();
-                    intakeFSM.setJustSwitched(false);
-                }
-                // Retract slide back to magnet sensor to reset encoder, then send it to the transfer position
-                if (horizSlideSensor.isPressed()) {
-                    intakeFSM.slideWasJustRetracted = true;
-                    horizLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    runLiftToPosition(horizLinearMotor, TRANSFER_TARGET, 0.5);
-                }
-                if (!horizLinearMotor.isBusy() && intakeFSM.slideWasJustRetracted) {
-                    horizLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    if (gamepad2.x) {
-                        intakeFSM.setState(IntakeFSM.IntakeState.TRANSFER);
-                        intakeFSM.setJustSwitched(true);
-                    } else if (gamepad2.b) {
-                        intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
-                        intakeFSM.setJustSwitched(true);
-                    }
-                    intakeFSM.slideWasJustRetracted = false;
+                    intakeOuttakeFSM.setJustSwitched(false);
                 }
                 break;
                 // TODO
             case TRANSFER:
-                if (intakeFSM.justSwitched) {
-                    intakeFSM.timer.reset();
-                    intakeFSM.justSwitched = false;
+                if (intakeOuttakeFSM.justSwitched) {
+                    intakeOuttakeFSM.timer.reset();
+                    intakeOuttakeFSM.justSwitched = false;
                 }
 
             // --------------------------------------- SPECIMEN RETRACT ---------------------------------------
             case SPECIMEN_RETRACT:
                 // Initiate the auto retraction of the slide and servos
-                if (intakeFSM.justSwitched()) {
-                    intakeFSM.timer.reset();
+                if (intakeOuttakeFSM.justSwitched()) {
+                    intakeOuttakeFSM.timer.reset();
                     pullIntakeBack();
-                    intakeFSM.setJustSwitched(false);
+                    intakeOuttakeFSM.setJustSwitched(false);
                 }
                 if (horizSlideSensor.isPressed()) {
-                    horizLinearPower = 0.0;
-                    horizLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
-                    intakeFSM.setJustSwitched(true);
+                    intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT);
+                    intakeOuttakeFSM.setJustSwitched(true);
                 }
                 break;
             default:
                 // should never be reached, as intakeState should never be null
-                intakeFSM.setState(IntakeFSM.IntakeState.DEFAULT);
-                intakeFSM.justSwitched = true;
+                intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT);
+                intakeOuttakeFSM.justSwitched = true;
         }
     }
 
-    // --------------------------------------- CLAW OUTTAKE ---------------------------------------
-    public void runClawOuttake() {
-        switch (outtakeFSM.state) {
-            case DEFAULT:
-                outtakeFSM.timer.reset();
+    // --------------------------------------- SPECIMENS ---------------------------------------
+    public void runSpecimens() {
+        switch (specimenFSM.getState()) {
+            case READY_TO_GRAB:
+                if (specimenFSM.justSwitched) {
+                    specimenFSM.timer.reset();
+                    specimenFSM.setJustSwitched(false);
+                }
                 break;
-            case READY_TO_PICKUP:
+            case GRAB_AND_FLIP:
+                if (specimenFSM.justSwitched) {
+                    specimenFSM.timer.reset();
+                    specimenFSM.setJustSwitched(false);
+                }
                 break;
-            case PICKUP:
-                outtakeFSM.timer.reset();
-                break;
-            case LIFT:
-                outtakeFSM.timer.reset();
-                break;
-
-            case DUMP:
-                outtakeFSM.timer.reset();
-                break;
-            case FLIP_BACK:
-                break;
-            case DESCENT:
-                outtakeFSM.timer.reset();
+            case SPECIMEN_HANG:
+                if (specimenFSM.justSwitched) {
+                    specimenFSM.timer.reset();
+                    specimenFSM.setJustSwitched(false);
+                }
                 break;
             default:
-                // should never be reached, as outtakeStart should never be null
-                outtakeFSM.setState(OuttakeFSM.OuttakeState.DEFAULT);
+                // should never be reached, as specimenState should never be null
+                specimenFSM.setState(SpecimenFSM.SpecimenState.READY_TO_GRAB);
+                specimenFSM.justSwitched = true;
         }
     }
 
@@ -356,10 +327,6 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             else {horizLinearPower = 0.0;}
             return;
         }
-        // Dont let driver mess with the slide while auto retracting
-        if (intakeFSM.getState() == IntakeFSM.IntakeState.SAMPLE_RETRACT) {
-            return;
-        }
 
         liftPosHoriz = Math.abs(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
         // if slide sensor touched or manual adjustment button pressed
@@ -367,14 +334,14 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             liftPosAdjHoriz = Math.abs(horizLinearMotor.getCurrentPosition());
         }
 
-        // Prevent smashing into outtake arm
-        // TODO Reverse inequality if outtake servo positions get inverted
-        if (liftPosHoriz < 800 & outtakeArmServoRot < OUTTAKE_ARM_DEFAULT) {
-            outtakeFSM.setState(OuttakeFSM.OuttakeState.DEFAULT);
-            outtakeFSM.setJustSwitched(true);
-        }
+        // TODO Prevent smashing into outtake claw
+
         // Stop overextension and over retraction of horizontal linear motor
         if (gamepad2.right_stick_y > 0 && !horizSlideSensor.isPressed()) {
+            if (intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SAMPLE_RETRACT
+            || intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT) {
+                return;
+            }
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
@@ -443,16 +410,16 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     public String runIntakeGrabbing() {
         // Allow 0.15 seconds for arm to slam down and grab the block
-        if (intakeFSM.clawClosedInitiated && intakeFSM.timer.seconds() > 0.15) {
+        if (intakeOuttakeFSM.clawClosedInitiated && intakeOuttakeFSM.timer.seconds() > 0.15) {
             intakeClawServoRot = INTAKE_CLAW_CLOSE;
-            intakeFSM.clawClosedInitiated = false;
+            intakeOuttakeFSM.clawClosedInitiated = false;
             return "GRAB";
         }
         // If rt pressed swing the arm down and initiate claw closing
-        else if (g2RightTriggerPressed && !intakeFSM.clawClosedInitiated) {
+        else if (g2RightTriggerPressed && !intakeOuttakeFSM.clawClosedInitiated) {
             intakeArmServoRot = INTAKE_ARM_DOWN;
-            intakeFSM.timer.reset();
-            intakeFSM.clawClosedInitiated = true;
+            intakeOuttakeFSM.timer.reset();
+            intakeOuttakeFSM.clawClosedInitiated = true;
             return "NONE";
         }
         // Release the claw
@@ -474,12 +441,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         }
         horizLinearPower = -0.9;
 
-        // MOVE THE OUTTAKE SERVOS TO DEFAULT POSITION TO PREVENT SMASHING INTO IT
-        // TODO Reverse inequality if outtake servo positions get inverted
-        if (outtakeArmServoRot < OUTTAKE_ARM_DEFAULT) {
-            outtakeFSM.setState(OuttakeFSM.OuttakeState.DEFAULT);
-            outtakeFSM.setJustSwitched(true);
-        }
+        // TODO Prevent smashing into the outtake claw
     }
 
     public void endGame() {
@@ -494,16 +456,30 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public void switchGameMode() {
-        if (allPressed && getRuntime() > gameModeCurrent + 1) {
-            gameModeCurrent = getRuntime();
+        // Check if all buttons are pressed and this is a new state
+        if (allPressed && !allPreviouslyPressed) {
+            allPreviouslyPressed = true; // Mark the state as handled
+
+            // Toggle game mode and provide feedback
             if (gameMode == GameMode.SAMPLE) {
                 gameMode = GameMode.SPECIMEN;
-            }
-            else if (gameMode == GameMode.SPECIMEN) {
+                specimenFSM.setState(SpecimenFSM.SpecimenState.READY_TO_GRAB);
+                intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT);
+                specimenFSM.setJustSwitched(true);
+                intakeOuttakeFSM.setJustSwitched(true);
+                rumbleGamePads(1500, 0.5); // Longer, softer rumble
+            } else if (gameMode == GameMode.SPECIMEN) {
                 gameMode = GameMode.SAMPLE;
+                rumbleGamePads(500, 1.0); // Shorter, stronger rumble
             }
         }
+
+        // Reset the state when buttons are released
+        if (!allPressed && allPreviouslyPressed) {
+            allPreviouslyPressed = false;
+        }
     }
+
     public double incrementServoRot(double currentRot, double amount, double min, double max) {
         if (max < min) throw new IllegalArgumentException("Min must be less than max");
         return Range.clip(currentRot, min, max) + amount;
@@ -537,11 +513,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         telemetry.addData("Outtake Claw Servo", outtakeClawServo.getPosition());
         telemetry.addData("Outtake Twist Servo", outtakeTwistServo.getPosition());
 
-        telemetry.addData("Intake State:", intakeFSM.getState());
-        telemetry.addData("Intake Timer", intakeFSM.timer.time());
+        telemetry.addData("Intake State:", intakeOuttakeFSM.getState());
+        telemetry.addData("Intake Timer", intakeOuttakeFSM.timer.time());
 
-        telemetry.addData("Outtake State:", outtakeFSM.getState());
-        telemetry.addData("Outtake Timer", outtakeFSM.timer.time());
+        telemetry.addData("Specimen State:", specimenFSM.getState());
+        telemetry.addData("Outtake Timer", specimenFSM.timer.time());
 
         telemetry.addLine()
                 .addData("Red", "%.3f", colors.red)
