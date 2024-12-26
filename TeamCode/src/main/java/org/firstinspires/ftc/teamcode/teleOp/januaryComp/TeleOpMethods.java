@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleOp.januaryComp;
 
-import android.annotation.SuppressLint;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.ftc.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,6 +18,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     @Override
     public void init() {
         super.init();
+    // ------------------------------------ FINITE STATE MACHINES ------------------------------------
     }
     // Intake Finite State Machine
     protected class IntakeFSM {
@@ -89,12 +88,12 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
     OuttakeFSM outtakeFSM = new OuttakeFSM();
 
+    // ------------------------------------ TELEOP VARIABLES ------------------------------------
     enum GameMode {
         SAMPLE,
         SPECIMEN
     }
     GameMode gameMode = GameMode.SAMPLE;
-    // ------------------------------------ TELEOP VARIABLES ------------------------------------
     // Game variables
     boolean initiatedEndGame = false;
     boolean allPressed = (g2RightTriggerPressed && g2LeftTriggerPressed && gamepad2.left_bumper && gamepad2.right_bumper);
@@ -289,6 +288,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     intakeFSM.slideWasJustRetracted = false;
                 }
                 break;
+                // TODO
             case TRANSFER:
                 if (intakeFSM.justSwitched) {
                     intakeFSM.timer.reset();
@@ -361,7 +361,6 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             return;
         }
 
-        // Stop overextension and over retraction of horizontal linear motor
         liftPosHoriz = Math.abs(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
         // if slide sensor touched or manual adjustment button pressed
         if (horizSlideSensor.isPressed() || gamepad2.dpad_left) {
@@ -374,6 +373,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             outtakeFSM.setState(OuttakeFSM.OuttakeState.DEFAULT);
             outtakeFSM.setJustSwitched(true);
         }
+        // Stop overextension and over retraction of horizontal linear motor
         if (gamepad2.right_stick_y > 0 && !horizSlideSensor.isPressed()) {
             horizLinearPower = -gamepad2.right_stick_y * 0.5;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
@@ -482,16 +482,14 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         }
     }
 
-    public void controlRumble() {
+    public void endGame() {
         if (!initiatedEndGame && getRuntime() > 90 ) {
-            gamepad1.rumble(1000);
-            gamepad2.rumble(1000);
+            rumbleGamePads(1_000, 0.5);
             initiatedEndGame = true;
         }
 
         if (getRuntime() > 110) {
-            gamepad1.rumble(10000);
-            gamepad2.rumble(10000);
+            rumbleGamePads(10_000, 0.5);
         }
     }
 
@@ -515,6 +513,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setTargetPosition(target);
         motor.setPower(power);
+    }
+
+    public void rumbleGamePads(int ms, double power) {
+        gamepad1.rumble(power, power, ms);
+        gamepad2.rumble(power, power, ms);
     }
 
     public void addTelemetryToDriverStation() {

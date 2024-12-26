@@ -14,12 +14,15 @@ public class TeleOpModeBLUE extends TeleOpMethods {
     @Override
     public void loop() {
         runMecanumDrive();
+
         runClawIntake();
         runClawOuttake();
         runLeadScrew();
         getColors();
         horizontalSlideSystem();
-        controlRumble();
+        switchGameMode();
+        endGame();
+
         updateAttachments();
         addTelemetryToDriverStation();
     }
