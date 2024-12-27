@@ -31,13 +31,13 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
 //    public int cioqlnwqduhqw
 
     // --------------------------------- VERT LIFT ----------------------------------
-    public class VertLift {
-        private final DcMotorEx liftMotor;
+    public class VertLinearMotor {
+        private final DcMotorEx vertLinearMotor;
 
-        public VertLift(HardwareMap hardwareMap) {
-            liftMotor = hardwareMap.get(DcMotorEx.class, "liftMotor");
-            liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        public VertLinearMotor(HardwareMap hardwareMap) {
+            vertLinearMotor = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
+            vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
 
         public class LiftUp implements Action {
@@ -46,15 +46,16 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setTargetPosition(liftUpHeight);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    vertLinearMotor.setTargetPosition(liftUpHeight);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
-                if (liftMotor.isBusy() && !isStopRequested()) {
+                if (vertLinearMotor.isBusy() && !isStopRequested()) {
+//                    vertLinearMotor.setPower();
                     return true;
                 } else {
-                    liftMotor.setPower(0);
+                    vertLinearMotor.setPower(0);
                     return false;
                 }
             }
@@ -69,15 +70,15 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setTargetPosition(hookHeight);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    vertLinearMotor.setTargetPosition(hookHeight);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
-                if (liftMotor.isBusy() && !isStopRequested()) {
+                if (vertLinearMotor.isBusy() && !isStopRequested()) {
                     return true;
                 } else {
-                    liftMotor.setPower(0);
+                    vertLinearMotor.setPower(0);
                     return false;
                 }
             }
@@ -93,16 +94,16 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    liftMotor.setPower(-0.8);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    vertLinearMotor.setPower(-0.8);
                     initialized = true;
                 }
-                packet.put("liftPos", liftMotor.getCurrentPosition());
+                packet.put("liftPos", vertLinearMotor.getCurrentPosition());
                 if (!liftSensor.isPressed() && !isStopRequested()) {
                     return true;
                 } else {
-                    liftMotor.setPower(0);
-                    liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    vertLinearMotor.setPower(0);
+                    vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     return false;
                 }
             }
@@ -117,15 +118,15 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    liftMotor.setPower(-0.8);
-                    liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    vertLinearMotor.setPower(-0.8);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
-                if (liftMotor.isBusy() && !isStopRequested()) {
+                if (vertLinearMotor.isBusy() && !isStopRequested()) {
                     return true;
                 } else {
-                    liftMotor.setPower(0);
+                    vertLinearMotor.setPower(0);
                     return false;
                 }
             }

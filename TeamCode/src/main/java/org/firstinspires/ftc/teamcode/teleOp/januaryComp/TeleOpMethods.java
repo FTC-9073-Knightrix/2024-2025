@@ -86,8 +86,8 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         SPECIMEN
     }
     GameMode gameMode = GameMode.SAMPLE;
+
     boolean initiatedEndGame = false;
-    boolean allPressed = (g2RightTriggerPressed && g2LeftTriggerPressed && gamepad2.left_bumper && gamepad2.right_bumper);
     boolean allPreviouslyPressed = false;
 
     // Drive train speeds
@@ -173,7 +173,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
         if (gamepad1.y) {
 //            imu.resetYaw();
-            pinpoint.recalibrateIMU();
+            pinpoint.resetPosAndIMU();
         }
 
 //        orientation = imu.getRobotYawPitchRollAngles();
@@ -342,9 +342,9 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             || intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT) {
                 return;
             }
-            horizLinearPower = -gamepad2.right_stick_y * 0.5;
+            horizLinearPower = gamepad2.right_stick_y * 0.5;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
-            horizLinearPower = -gamepad2.right_stick_y * 0.5;
+            horizLinearPower = gamepad2.right_stick_y * 0.5;
         } else { horizLinearPower = 0.0;}
     }
 
@@ -353,6 +353,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         // TODO FILL OUT LEAD SCREW CODE
 
     }
+
 
     public void getColors() {
         // Color sensor get the RGB values
@@ -409,6 +410,8 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public String runIntakeGrabbing() {
+        boolean g2RightTriggerPressed = gamepad2.right_trigger > 0.4;
+        boolean g2LeftTriggerPressed = gamepad2.left_trigger > 0.4;
         // Allow 0.15 seconds for arm to slam down and grab the block
         if (intakeOuttakeFSM.clawClosedInitiated && intakeOuttakeFSM.timer.seconds() > 0.15) {
             intakeClawServoRot = INTAKE_CLAW_CLOSE;
@@ -456,6 +459,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public void switchGameMode() {
+        // require full press of triggers to initiate
+        boolean g2RightTriggerPressed = gamepad2.right_trigger >= 0.99;
+        boolean g2LeftTriggerPressed = gamepad2.right_trigger >= 0.99;
+        boolean allPressed = (g2RightTriggerPressed && g2LeftTriggerPressed && gamepad2.left_bumper && gamepad2.right_bumper);
+
         // Check if all buttons are pressed and this is a new state
         if (allPressed && !allPreviouslyPressed) {
             allPreviouslyPressed = true; // Mark the state as handled
@@ -502,7 +510,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 //        telemetry.addData("Gyro: ", "Yaw: " + String.format(Locale.US, "%.2f", orientation.getYaw(AngleUnit.DEGREES))
 //                                                + "Roll: " + String.format(Locale.US, "%.2f", orientation.getRoll(AngleUnit.DEGREES))
 //                                                + "Pitch: " + String.format(Locale.US, "%.2f", orientation.getPitch(AngleUnit.DEGREES)));
-        telemetry.addData("Heading: ", String.format(Locale.US, "%.2f", pinpoint.getHeading()));
+        telemetry.addData("Heading: ", String.format(Locale.US, "%.2f", Math.toDegrees(pinpoint.getHeading())));
         telemetry.addData("Slowmode: ", finalSlowMode);
 
         telemetry.addData("Intake Arm Servo", intakeArmServo.getPosition());

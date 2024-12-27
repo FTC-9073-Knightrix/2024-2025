@@ -6,10 +6,12 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.autonomous.MecanumDrive;
+import org.firstinspires.ftc.teamcode.autonomous.PinpointDrive;
 
 @Autonomous(name = "ParallelActionsTest", group = "Autonomous")
 public class FiveSpecimenAuto extends FiveSpecimenActions {
@@ -21,8 +23,8 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
     public void runOpMode() throws InterruptedException {
 
         Pose2d beginPose = new Pose2d(-8, -62, forwardAngle);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, beginPose);
-        VertLift lift = new VertLift(hardwareMap);
+        PinpointDrive drive = new PinpointDrive(hardwareMap, beginPose);
+        VertLinearMotor vertLinearMotor = new VertLinearMotor(hardwareMap);
         Claw claw = new Claw(hardwareMap);
         ClawArm clawArm = new ClawArm(hardwareMap);
 
@@ -31,8 +33,15 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                 .lineToX(-32);
         Action ToBarAction1 = ToBarTraj1.build();
 
+
         // Robot drives to push the 3 samples into the observation zone
-        TrajectoryActionBuilder PushBlocksTraj = ToBarTraj1.endTrajectory().fresh();
+        TrajectoryActionBuilder PushBlocksTraj = ToBarTraj1.endTrajectory().fresh()
+                // first u turn
+                .strafeToConstantHeading(new Vector2d(28, -38))
+                .splineToConstantHeading(new Vector2d(29, -38), rightAngle)
+                .splineToConstantHeading(new Vector2d(36, -32), forwardAngle)
+                .splineToConstantHeading(new Vector2d(36, -15), forwardAngle)
+                .splineToConstantHeading(new Vector2d(44, -15), backwardAngle);
 
         // Robot drives to the observation zone to pick up the 2nd spec
         TrajectoryActionBuilder ToObsvTraj1 = PushBlocksTraj.endTrajectory().fresh();
@@ -89,9 +98,9 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToBarAction1,
-                                    lift.liftUpToChamber()
+                                    vertLinearMotor.liftUpToChamber()
                             ),
-                            lift.hookOnBar(),
+                            vertLinearMotor.hookOnBar(),
                             claw.openClaw()
                     )
             );
@@ -101,7 +110,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
             Actions.runBlocking(
                     new ParallelAction(
                             PushBlocksAction,
-                            lift.liftDown()
+                            vertLinearMotor.liftDown()
                     )
             );
 
@@ -117,7 +126,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                                     0.5
                             ),
                             claw.closeClaw(),
-                            lift.liftOffWall()
+                            vertLinearMotor.liftOffWall()
                     )
             );
 
@@ -127,10 +136,10 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToBarAction2,
-                                    lift.liftUpToChamber(),
+                                    vertLinearMotor.liftUpToChamber(),
                                     clawArm.clawArmForward()
                             ),
-                            lift.hookOnBar(),
+                            vertLinearMotor.hookOnBar(),
                             claw.openClaw()
                     )
             );
@@ -141,14 +150,14 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToObsvAction2,
-                                    lift.liftDown(),
+                                    vertLinearMotor.liftDown(),
                                     clawArm.clawArmBack()
                             ),
                             new SleepAction(
                                     0.5
                             ),
                             claw.closeClaw(),
-                            lift.liftOffWall()
+                            vertLinearMotor.liftOffWall()
                     )
             );
 
@@ -158,10 +167,10 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToBarAction3,
-                                    lift.liftUpToChamber(),
+                                    vertLinearMotor.liftUpToChamber(),
                                     clawArm.clawArmForward()
                             ),
-                            lift.hookOnBar(),
+                            vertLinearMotor.hookOnBar(),
                             claw.openClaw()
                     )
             );
@@ -172,14 +181,14 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToObsvAction3,
-                                    lift.liftDown(),
+                                    vertLinearMotor.liftDown(),
                                     clawArm.clawArmBack()
                             ),
                             new SleepAction(
                                     0.5
                             ),
                             claw.closeClaw(),
-                            lift.liftOffWall()
+                            vertLinearMotor.liftOffWall()
                     )
             );
 
@@ -189,10 +198,10 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToBarAction4,
-                                    lift.liftUpToChamber(),
+                                    vertLinearMotor.liftUpToChamber(),
                                     clawArm.clawArmForward()
                             ),
-                            lift.hookOnBar(),
+                            vertLinearMotor.hookOnBar(),
                             claw.openClaw()
                     )
             );
@@ -203,14 +212,14 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToObsvAction3,
-                                    lift.liftDown(),
+                                    vertLinearMotor.liftDown(),
                                     clawArm.clawArmBack()
                             ),
                             new SleepAction(
                                     0.5
                             ),
                             claw.closeClaw(),
-                            lift.liftOffWall()
+                            vertLinearMotor.liftOffWall()
                     )
             );
 
@@ -220,10 +229,10 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ToBarAction5,
-                                    lift.liftUpToChamber(),
+                                    vertLinearMotor.liftUpToChamber(),
                                     clawArm.clawArmForward()
                             ),
-                            lift.hookOnBar(),
+                            vertLinearMotor.hookOnBar(),
                             claw.openClaw()
                     )
             );
@@ -234,7 +243,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
                     new SequentialAction(
                             new ParallelAction(
                                     ParkAction,
-                                    lift.liftDown()
+                                    vertLinearMotor.liftDown()
                             )
                     )
             );

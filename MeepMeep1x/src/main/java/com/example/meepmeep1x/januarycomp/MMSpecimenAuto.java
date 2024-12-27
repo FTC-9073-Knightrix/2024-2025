@@ -69,9 +69,26 @@ public class MMSpecimenAuto {
                         .splineToConstantHeading(new Vector2d(61, -53), backwardAngle)
 
                         // pickup 1
-                        .strafeToConstantHeading(new Vector2d(40, -58), baseVelConstraint)
 
-                        // TODO HOOK AND PICKUP CYCLES
+
+                .strafeToConstantHeading(new Vector2d(40, -58), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(40, -57), forwardAngle)
+                .splineToConstantHeading(new Vector2d(6, -31), forwardAngle)
+                .strafeToConstantHeading(new Vector2d(40, -58))
+                .splineToConstantHeading(new Vector2d(40, -57), forwardAngle)
+                .splineToConstantHeading(new Vector2d(4, -31), forwardAngle)
+                .strafeToConstantHeading(new Vector2d(40, -58))
+                                .strafeToConstantHeading(new Vector2d(2, -31))
+                                .strafeToConstantHeading(new Vector2d(40, -58))
+                                .strafeToConstantHeading(new Vector2d(0, -31))
+                                .strafeToLinearHeading(new Vector2d(22, -47), Math.toRadians(330))
+                /*   .strafeToConstantHeading(new Vector2d(6, -31))
+                    .strafeToConstantHeading(new Vector2d(40, -58))
+                .strafeToConstantHeading(new Vector2d(4, -31))
+                .strafeToConstantHeading(new Vector2d(40, -58))
+                .strafeToConstantHeading(new Vector2d(2, -31))
+*/
+                // TODO HOOK AND PICKUP CYCLES
                  .build());
     }
 

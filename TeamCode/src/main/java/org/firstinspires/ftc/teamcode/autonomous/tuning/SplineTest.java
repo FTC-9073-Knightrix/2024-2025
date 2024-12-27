@@ -26,7 +26,6 @@ public final class SplineTest extends LinearOpMode {
                             .build());
         } else if (TuningOpModes.DRIVE_CLASS.equals(SparkFunOTOSDrive.class)) {
             SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, beginPose);
-
             waitForStart();
 
             Actions.runBlocking(

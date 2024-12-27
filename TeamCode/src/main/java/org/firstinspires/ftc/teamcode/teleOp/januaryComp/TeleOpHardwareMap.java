@@ -49,8 +49,6 @@ public abstract class TeleOpHardwareMap extends OpMode {
     final float GAIN = 22.0F; // The multiplicative factor for the color sensor, don't change
     public DistanceSensor intakeDistanceSensor;
 
-    public boolean g2RightTriggerPressed = gamepad2.right_trigger > 0.5;
-    public boolean g2LeftTriggerPressed = gamepad2.left_trigger > 0.5;
     //Create the gyroscope
 //    public IMU imu;
     public GoBildaPinpointDriver pinpoint;
@@ -68,7 +66,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
         pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
-        pinpoint.setOffsets(190.5, 5.588);
+        pinpoint.setOffsets(184.5, 5.588);
 
         vertLinearMotor = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
         horizLinearMotor = hardwareMap.get(DcMotor.class, "horizLinearMotor");
