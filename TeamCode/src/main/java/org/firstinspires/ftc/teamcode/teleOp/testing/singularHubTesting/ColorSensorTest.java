@@ -1,9 +1,5 @@
-package org.firstinspires.ftc.teamcode.teleOp.testing;
+package org.firstinspires.ftc.teamcode.teleOp.testing.singularHubTesting;
 
-import android.graphics.Color;
-
-import com.qualcomm.hardware.rev.RevColorSensorV3;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -12,11 +8,6 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.teleOp.januaryComp.TeleOpMethods;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Locale;
 
 @TeleOp
 public class ColorSensorTest extends OpMode {

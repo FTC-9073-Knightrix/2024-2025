@@ -1,9 +1,13 @@
+package org.firstinspires.ftc.teamcode.teleOp.testing.singularHubTesting
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.util.Range
 
 @TeleOp(name="Servo Test")
+@Disabled // Disabled because we can test on the fully built robot
 class ServoTest : OpMode() {
     lateinit var servo: Servo
     var servoRot: Double = 0.0;

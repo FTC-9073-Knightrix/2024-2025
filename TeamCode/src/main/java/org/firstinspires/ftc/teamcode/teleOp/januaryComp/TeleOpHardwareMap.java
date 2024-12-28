@@ -87,10 +87,10 @@ public abstract class TeleOpHardwareMap extends OpMode {
         colorSensor.setGain(GAIN);
         intakeDistanceSensor = hardwareMap.get(DistanceSensor.class, "colorSensor"); // REV Color V3 has built in distance
 
-        leftFront = new Motor(hardwareMap, "LF"); // Control Hub Motor Port 0
-        leftBack = new Motor(hardwareMap, "LB"); // Control Hub Motor Port 1
-        rightFront = new Motor(hardwareMap, "RF"); // Control Hub Motor Port 2
-        rightBack = new Motor(hardwareMap, "RB"); // Control Hub Motor Port 3
+        leftFront = new Motor(hardwareMap, "LF");
+        leftBack = new Motor(hardwareMap, "LB");
+        rightFront = new Motor(hardwareMap, "RF");
+        rightBack = new Motor(hardwareMap, "RB");
 
         // Reverse back wheel directions
         rightFront.setInverted(true);

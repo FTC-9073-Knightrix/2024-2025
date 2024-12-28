@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.teleOp.testing
+package org.firstinspires.ftc.teamcode.teleOp.testing.singularHubTesting
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 
 @TeleOp(name = "Motor + Encoder Test")
+@Disabled // Disabled because we can test on the fully built robot
 class MotorTest : OpMode() {
     lateinit var motor: DcMotor
     var motorPower: Double = 0.0;

@@ -85,7 +85,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         SAMPLE,
         SPECIMEN
     }
-    GameMode gameMode = GameMode.SAMPLE;
+    GameMode gameMode = GameMode.SPECIMEN;
 
     boolean initiatedEndGame = false;
     boolean allPreviouslyPressed = false;
@@ -98,28 +98,37 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     // TODO Change variables and servo program
     // Intake variables
-    double intakeArmServoRot = 0.5;
-    double intakeClawServoRot = 0.0;
-    double intakeTwistServoRot = 0.0;
-
     final double INTAKE_CLAW_CLOSE = 0.52;
     final double INTAKE_CLAW_OPEN = 1.0;
 
     final double INTAKE_TWIST_STRAIGHT = 0.5;
 
-    final double INTAKE_ARM_DOWN = 0.0;
-    final double INTAKE_ARM_DEFAULT = 0.5;
+    final double INTAKE_ARM_DOWN = 0.9;
+    final double INTAKE_ARM_DEFAULT = 0.6;
     final double INTAKE_ARM_TRANSFER = 1.0;
 
-    // Outtake variables
-    double outtakeArmServoRot = 0.5;
-    double outtakeClawServoRot = 0.0;
-    double outtakeTwistServoRot = 0.0;
+    double intakeArmServoRot = INTAKE_ARM_DEFAULT;
+    double intakeClawServoRot = INTAKE_CLAW_OPEN;
+    double intakeTwistServoRot = INTAKE_TWIST_STRAIGHT;
 
+
+    // Outtake variables
     final double OUTTAKE_ARM_BACK = 1.0;
-    final double OUTTAKE_ARM_HOOK = 0.75;
-    final double OUTTAKE_ARM_DEFAULT = 0.5;
+    final double OUTTAKE_ARM_HOOK = 0.4;
+    final double OUTTAKE_ARM_DEFAULT = 0.25;
     final double OUTTAKE_ARM_TRANSFER = 0.0;
+
+    final double OUTTAKE_CLAW_CLOSE = 0.0;
+    final double OUTTAKE_CLAW_OPEN = 1.0;
+
+    // THE MEANING OF BEARINGS POINTING UP AND DOWN ARE RELATIVE TO THEIR ORIENTATION WHEN THE
+    // ARM IS AT THE BACK OF THE ROBOT
+    final double OUTTAKE_TWIST_BEARINGS_POINTING_UP = 1.0;
+    final double OUTTAKE_TWIST_BEARINGS_POINTING_DOWN = 0.0;
+
+    double outtakeArmServoRot = (gameMode == GameMode.SPECIMEN) ? OUTTAKE_ARM_BACK : OUTTAKE_ARM_DEFAULT;
+    double outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
+    double outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
 
     // Horiz Lift
     int liftPosHoriz = 0;
@@ -140,7 +149,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     // Intake Color Sensor
     final float minColorIntensity = 0.2F;
     NormalizedRGBA colors = new NormalizedRGBA();
-    boolean useColorSensor = true;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
+    boolean useColorSensor = false;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
     enum GameColors {RED, BLUE, NONE}
     GameColors colorMatch = GameColors.NONE;
     GameColors allianceColor; // MUST be initialized in Op Mode as only RED or BLUE
@@ -291,21 +300,35 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     // --------------------------------------- SPECIMENS ---------------------------------------
     public void runSpecimens() {
+        // Specimen cycling ONLY runs in specimen gamemode on the controller
+        if (gameMode == GameMode.SPECIMEN) return;
         switch (specimenFSM.getState()) {
             case READY_TO_GRAB:
-                if (specimenFSM.justSwitched) {
+                if (specimenFSM.justSwitched()) {
                     specimenFSM.timer.reset();
+                    outtakeArmServoRot = OUTTAKE_ARM_BACK;
+                    outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
+                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
                     specimenFSM.setJustSwitched(false);
+                }
+                if (gamepad2.x) {
+                    specimenFSM.setState(SpecimenFSM.SpecimenState.GRAB_AND_FLIP);
+                    specimenFSM.setJustSwitched(true);
                 }
                 break;
             case GRAB_AND_FLIP:
-                if (specimenFSM.justSwitched) {
+                if (specimenFSM.justSwitched()) {
                     specimenFSM.timer.reset();
+                    outtakeClawServoRot = OUTTAKE_CLAW_CLOSE;
                     specimenFSM.setJustSwitched(false);
+                }
+                else if (specimenFSM.timer.seconds() > 0.10) {
+                    outtakeArmServoRot = OUTTAKE_ARM_HOOK;
+                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
                 }
                 break;
             case SPECIMEN_HANG:
-                if (specimenFSM.justSwitched) {
+                if (specimenFSM.justSwitched()) {
                     specimenFSM.timer.reset();
                     specimenFSM.setJustSwitched(false);
                 }
@@ -322,7 +345,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
         // MAY NEED THIS TO PASS INSPECTION
         // If the outtake claw extends behind the robot, bring slide back
-        if (outtakeArmServoRot > 0.5 && outtakeArmServoRot  < 0.75) { //TODO Change servo positions here
+        if (outtakeArmServoRot > 0.5 && outtakeArmServoRot  < 0.75 && liftPosHoriz > 1500) { //TODO Change servo positions here
             if (!horizSlideSensor.isPressed()) {horizLinearPower = -0.9;}
             else {horizLinearPower = 0.0;}
             return;
@@ -336,24 +359,17 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
         // TODO Prevent smashing into outtake claw
 
+        if (intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SAMPLE_RETRACT
+        || intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT) {
+            return;
+        }
         // Stop overextension and over retraction of horizontal linear motor
         if (gamepad2.right_stick_y > 0 && !horizSlideSensor.isPressed()) {
-            if (intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SAMPLE_RETRACT
-            || intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT) {
-                return;
-            }
             horizLinearPower = gamepad2.right_stick_y * 0.5;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
             horizLinearPower = gamepad2.right_stick_y * 0.5;
         } else { horizLinearPower = 0.0;}
     }
-
-    public void runLeadScrew() {
-        // --------------------------------------- LEAD SCREW ---------------------------------------
-        // TODO FILL OUT LEAD SCREW CODE
-
-    }
-
 
     public void getColors() {
         // Color sensor get the RGB values
@@ -402,10 +418,10 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     public void runIntakeTwist() {
         if (gamepad2.left_bumper) {
-            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.01, 0.0, 1.0);
+            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.03, 0.0, 1.0);
         }
         else if (gamepad2.right_bumper) {
-            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.01, 0.0, 1.0);
+            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.03, 0.0, 1.0);
         }
     }
 
@@ -506,12 +522,10 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     public void addTelemetryToDriverStation() {
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("g2LStickY, g2RStickY", gamepad2.left_stick_y + ", " + gamepad2.right_stick_y );
-//        telemetry.addData("Gyro: ", "Yaw: " + String.format(Locale.US, "%.2f", orientation.getYaw(AngleUnit.DEGREES))
-//                                                + "Roll: " + String.format(Locale.US, "%.2f", orientation.getRoll(AngleUnit.DEGREES))
-//                                                + "Pitch: " + String.format(Locale.US, "%.2f", orientation.getPitch(AngleUnit.DEGREES)));
         telemetry.addData("Heading: ", String.format(Locale.US, "%.2f", Math.toDegrees(pinpoint.getHeading())));
         telemetry.addData("Slowmode: ", finalSlowMode);
+        telemetry.addData("Gamemode:", gameMode);
+
 
         telemetry.addData("Intake Arm Servo", intakeArmServo.getPosition());
         telemetry.addData("Intake Claw Servo", intakeClawServo.getPosition());

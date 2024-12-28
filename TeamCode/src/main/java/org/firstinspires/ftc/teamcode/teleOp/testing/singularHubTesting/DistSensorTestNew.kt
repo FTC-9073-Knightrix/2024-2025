@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.teleOp.testing
+package org.firstinspires.ftc.teamcode.teleOp.testing.singularHubTesting
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -8,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 
 @TeleOp(name = "DistSensorTestNew")
+@Disabled // Disabled because we can test on the fully built robot
 class DistSensorTestNew : OpMode() {
     lateinit var motor: DcMotor
     lateinit var servo: Servo
