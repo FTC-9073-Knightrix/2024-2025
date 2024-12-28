@@ -308,6 +308,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     specimenFSM.timer.reset();
                     outtakeArmServoRot = OUTTAKE_ARM_BACK;
                     outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
+
                     outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
                     specimenFSM.setJustSwitched(false);
                 }
@@ -458,7 +459,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         else if (gameMode == GameMode.SPECIMEN) {
             intakeArmServoRot = INTAKE_ARM_DEFAULT;
         }
-        horizLinearPower = -0.9;
+        horizLinearPower = 1.0;
 
         // TODO Prevent smashing into the outtake claw
     }
@@ -526,6 +527,8 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         telemetry.addData("Slowmode: ", finalSlowMode);
         telemetry.addData("Gamemode:", gameMode);
 
+        telemetry.addData("Horiz slide", Math.abs(horizLinearMotor.getCurrentPosition()));
+        telemetry.addData("vert slide", vertLinearMotor.getCurrentPosition());
 
         telemetry.addData("Intake Arm Servo", intakeArmServo.getPosition());
         telemetry.addData("Intake Claw Servo", intakeClawServo.getPosition());

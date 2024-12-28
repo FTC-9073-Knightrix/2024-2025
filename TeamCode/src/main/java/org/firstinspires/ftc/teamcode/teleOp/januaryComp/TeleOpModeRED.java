@@ -18,7 +18,6 @@ public class TeleOpModeRED extends TeleOpMethods {
         getColors();
         runIntakeOuttake();
         runSpecimens();
-        runLeadScrew();
         horizontalSlideSystem();
         switchGameMode();
         endGame();

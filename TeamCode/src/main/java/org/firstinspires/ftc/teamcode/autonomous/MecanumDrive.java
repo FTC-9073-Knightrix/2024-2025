@@ -64,12 +64,12 @@ public class MecanumDrive {
 
         // drive model parameters
         public double inPerTick = 1; // If you're using OTOS/Pinpoint leave this at 1 (all values will be in inches, 1 tick = 1 inch)
-        public double lateralInPerTick = inPerTick; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
-        public double trackWidthTicks = 0;
+        public double lateralInPerTick = 0.680413616109928; // Tune this with LateralRampLogger (even if you use OTOS/Pinpoint)
+        public double trackWidthTicks = 14.268150560948662;
 
         // feedforward parameters (in tick units)
-        public double kS = 0.6837011842604115;
-        public double kV = 0.18855911533412195;
+        public double kS = 0.9037272480042517;
+        public double kV = 0.18968390952357417;
 
         public double kA = 0;
 
@@ -83,13 +83,13 @@ public class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 0.0;
-        public double lateralGain = 0.0;
-        public double headingGain = 0.0; // shared with turn
+        public double axialGain = 15;
+        public double lateralGain = 12;
+        public double headingGain = 12; // shared with turn
 
-        public double axialVelGain = 0.0;
-        public double lateralVelGain = 0.0;
-        public double headingVelGain = 0.0; // shared with turn
+        public double axialVelGain = 1.2;
+        public double lateralVelGain = 1.2;
+        public double headingVelGain = 1.2; // shared with turn
     }
 
     public static Params PARAMS = new Params();
