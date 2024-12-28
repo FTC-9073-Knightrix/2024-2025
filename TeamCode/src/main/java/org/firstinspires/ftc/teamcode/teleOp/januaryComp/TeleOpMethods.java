@@ -142,6 +142,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double vertLinearPower = 0.0;
     final int VERT_MAX = 3600;
     final int TRANSFER_TARGET = 100;
+    final int HOOK_TARGET = 500;
 
     // Hanger
     double hangerPower = 0.0;
@@ -301,7 +302,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     // --------------------------------------- SPECIMENS ---------------------------------------
     public void runSpecimens() {
         // Specimen cycling ONLY runs in specimen gamemode on the controller
-        if (gameMode == GameMode.SPECIMEN) return;
+        if (gameMode == GameMode.SAMPLE) return;
         switch (specimenFSM.getState()) {
             case READY_TO_GRAB:
                 if (specimenFSM.justSwitched()) {
@@ -325,6 +326,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 else if (specimenFSM.timer.seconds() > 0.10) {
                     outtakeArmServoRot = OUTTAKE_ARM_HOOK;
                     outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
+                    runLiftToPosition(vertLinearMotor, HOOK_TARGET, 0.4);
+                }
+                else if (specimenFSM.timer.seconds() > 0.5) {
+                    if (gamepad2.b) {
+                        specimenFSM.setState(SpecimenFSM.SpecimenState.SPECIMEN_HANG);
+                        specimenFSM.setJustSwitched(true);
+                    }
                 }
                 break;
             case SPECIMEN_HANG:
@@ -359,6 +367,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
         // TODO Prevent smashing into outtake claw
 
+        // Prevent driver messing with slide if its auto retracting
         if (intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SAMPLE_RETRACT
         || intakeOuttakeFSM.getState() == IntakeOuttakeFSM.IntakeOuttakeState.SPECIMEN_RETRACT) {
             return;
