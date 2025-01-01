@@ -16,8 +16,18 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     @Override
     public void init() {
         super.init();
-    // ------------------------------------ FINITE STATE MACHINES ------------------------------------
     }
+    // Game variables
+    enum GameMode {
+        SAMPLE,
+        SPECIMEN
+    }
+    GameMode gameMode = GameMode.SPECIMEN;
+
+    boolean initiatedEndGame = false;
+    boolean allPreviouslyPressed = false;
+    boolean g2XPreviouslyPressed = false;
+    // ------------------------------------ FINITE STATE MACHINES ------------------------------------
     // Intake Outtake Transfer Finite State Machine
     class IntakeOuttakeFSM {
         private IntakeOuttakeState state;
@@ -69,7 +79,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         }
 
         public SpecimenFSM() {
-            state = (gameMode == GameMode.SPECIMEN) ? SpecimenState.READY_TO_GRAB : SpecimenState.INACTIVE;
+            state = SpecimenState.READY_TO_GRAB;
             timer = new ElapsedTime();
             justSwitched = true;
             slideHasBeenSentToPos = false;
@@ -83,15 +93,6 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     SpecimenFSM specimenFSM = new SpecimenFSM();
 
     // ------------------------------------ TELEOP VARIABLES ------------------------------------
-    // Game variables
-    enum GameMode {
-        SAMPLE,
-        SPECIMEN
-    }
-    GameMode gameMode = GameMode.SPECIMEN;
-
-    boolean initiatedEndGame = false;
-    boolean allPreviouslyPressed = false;
 
     // Drive train speeds
     final double driveSpeed = 0.66;
@@ -106,9 +107,10 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     final double INTAKE_TWIST_STRAIGHT = 0.5;
 
-    final double INTAKE_ARM_DOWN = 0.9;
-    final double INTAKE_ARM_DEFAULT = 0.7;
-    final double INTAKE_ARM_TRANSFER = 1.0;
+    final double INTAKE_ARM_DOWN = 0.85;
+    final double INTAKE_ARM_DEFAULT = 0.55;
+    final double INTAKE_ARM_HOVER = 0.68;
+    final double INTAKE_ARM_TRANSFER = 0.0;
 
     double intakeArmServoRot = INTAKE_ARM_DEFAULT;
     double intakeClawServoRot = INTAKE_CLAW_OPEN;
@@ -116,14 +118,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
 
     // Outtake variables
-    final double OUTTAKE_ARM_BACK = 1.0;
-    final double OUTTAKE_ARM_HOOK = 0.24
-            ;
-    final double OUTTAKE_ARM_DEFAULT = 0.25;
+    final double OUTTAKE_ARM_BACK = 0.96;
+    final double OUTTAKE_ARM_HOOK = 0.24;
+    final double OUTTAKE_ARM_DEFAULT = 0.15;
     final double OUTTAKE_ARM_TRANSFER = 0.0;
 
-    final double OUTTAKE_CLAW_CLOSE = 0.0;
-    final double OUTTAKE_CLAW_OPEN = 1.0;
+    final double OUTTAKE_CLAW_CLOSE = 0.15;
+    final double OUTTAKE_CLAW_OPEN = 0.66;
 
     // THE MEANING OF BEARINGS POINTING UP AND DOWN ARE RELATIVE TO THEIR ORIENTATION WHEN THE
     // ARM IS AT THE BACK OF THE ROBOT
@@ -133,6 +134,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double outtakeArmServoRot = (gameMode == GameMode.SPECIMEN) ? OUTTAKE_ARM_BACK : OUTTAKE_ARM_DEFAULT;
     double outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
     double outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
+
 
     // Horiz Lift
     int liftPosHoriz = 0;
@@ -146,7 +148,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double vertLinearPower = 0.0;
     final int VERT_MAX = -3600;
     final int TRANSFER_TARGET = -100;
-    final int HOOK_TARGET = -600;
+    final int HOOK_TARGET = -750;
 
     // Hanger
     double hangerPower = 0.0;
@@ -154,7 +156,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     // Intake Color Sensor
     final float minColorIntensity = 0.2F;
     NormalizedRGBA colors = new NormalizedRGBA();
-    boolean useColorSensor = false;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
+    boolean useColorSensor = true;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
     enum GameColors {RED, BLUE, NONE}
     GameColors colorMatch = GameColors.NONE;
     GameColors allianceColor; // MUST be initialized in Op Mode as only RED or BLUE
@@ -224,6 +226,19 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     intakeOuttakeFSM.setJustSwitched(false);
                 }
 
+                if (gamepad2.x && !g2XPreviouslyPressed) {
+                    g2XPreviouslyPressed = true;
+                    if (intakeArmServoRot == INTAKE_ARM_DEFAULT) {
+                        intakeArmServoRot = INTAKE_ARM_HOVER;
+                    }
+                    else
+                        if (intakeArmServoRot == INTAKE_ARM_HOVER) {
+                        intakeArmServoRot = INTAKE_ARM_DEFAULT;
+                    }
+                }
+                if (!gamepad2.x && g2XPreviouslyPressed) {
+                    g2XPreviouslyPressed = false;
+                }
                 runIntakeTwist();
                 if (runIntakeGrabbing().equals("GRAB")) {
                     intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.PICKUP);
@@ -239,7 +254,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
                 // Allow some time to let block get picked up
                 if (intakeOuttakeFSM.timer.seconds() > 0.25) {
-                    intakeArmServoRot = INTAKE_ARM_DEFAULT;
+                    intakeArmServoRot = INTAKE_ARM_HOVER;
 
                     if (useColorSensor) {
                         boolean rejectBlock = (!sampleColorIsAcceptable() || intakeDistanceSensor.getDistance(DistanceUnit.CM) > 1.5);
@@ -322,7 +337,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
                     specimenFSM.setJustSwitched(false);
                 }
-                if (gamepad2.x) {
+                if (gamepad1.x) {
                     if (gameMode == GameMode.SAMPLE) return;
                     specimenFSM.setState(SpecimenFSM.SpecimenState.GRAB_AND_FLIP);
                     specimenFSM.setJustSwitched(true);
@@ -336,7 +351,6 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 }
                 if (specimenFSM.timer.seconds() > 0.10 && !specimenFSM.slideHasBeenSentToPos) {
                     outtakeArmServoRot = OUTTAKE_ARM_HOOK;
-                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
                     vertLinearMotor.setTargetPosition(HOOK_TARGET);
                     vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     specimenFSM.slideHasBeenSentToPos = true;
@@ -346,17 +360,22 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 } else {
                     vertLinearPower = 0.0;
                 }
-                if (specimenFSM.timer.seconds() > 1.0 && gamepad2.b) {
-                    specimenFSM.setState(SpecimenFSM.SpecimenState.SPECIMEN_HANG);
-                    specimenFSM.setJustSwitched(true);
+                if (specimenFSM.timer.seconds() > 0.25 ) {
+                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
+                    if (gamepad1.b) {
+                        specimenFSM.setState(SpecimenFSM.SpecimenState.SPECIMEN_HANG);
+                        specimenFSM.setJustSwitched(true);
+                    }
                 }
                 break;
+
             case SPECIMEN_HANG:
                 if (specimenFSM.justSwitched()) {
                     specimenFSM.timer.reset();
                     vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     specimenFSM.slideHasBeenSentToPos = false;
-                    vertLinearPower = 1.0;
+                    vertLinearPower = 0.5;
+
                     specimenFSM.setJustSwitched(false);
                 }
                 if (vertSlideSensor.isPressed()) {
@@ -391,10 +410,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             return;
         }
 
-        liftPosHoriz = Math.abs(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
+//        liftPosHoriz = Math.abs(horizLinearMotor.getCurrentPosition() - liftPosAdjHoriz);
+        liftPosHoriz = horizLinearMotor.getCurrentPosition();
         // if slide sensor touched or manual adjustment button pressed
         if (horizSlideSensor.isPressed() || gamepad2.dpad_left) {
-            liftPosAdjHoriz = Math.abs(horizLinearMotor.getCurrentPosition());
+//            liftPosAdjHoriz = Math.abs(horizLinearMotor.getCurrentPosition());
+//            liftPosAdjHoriz = 0;
+            liftPosHoriz = 0;
         }
 
         // TODO Prevent smashing into outtake claw
@@ -406,9 +428,9 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         }
         // Stop overextension and over retraction of horizontal linear motor
         if (gamepad2.right_stick_y > 0 && !horizSlideSensor.isPressed()) {
-            horizLinearPower = Math.pow(gamepad2.right_stick_y, 2);
+            horizLinearPower = gamepad2.right_stick_y * 0.6;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
-            horizLinearPower = Math.pow(gamepad2.right_stick_y, 2);
+            horizLinearPower = gamepad2.right_stick_y * 0.6;
         } else { horizLinearPower = 0.0;}
     }
 
@@ -457,12 +479,14 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public void runIntakeTwist() {
-        if (gamepad2.right_bumper) {
-            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.03, 0.0, 1.0);
-        }
-        else if (gamepad2.left_bumper) {
-            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.03, 0.0, 1.0);
-        }
+//        if (gamepad2.right_bumper) {
+//            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.015, 0.0, 1.0);
+//        }
+//        else if (gamepad2.left_bumper) {
+//            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.015, 0.0, 1.0);
+//        }
+        intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -gamepad2.left_stick_x * 0.02, 0.0, 1.0 );
+
     }
 
     public String runIntakeGrabbing() {
@@ -509,10 +533,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
             initiatedEndGame = true;
         }
 
-        if (getRuntime() > 110) {
-            rumbleGamePads(10_000, 0.5);
-        }
+//        if (getRuntime() > 110) {
+//            rumbleGamePads(10_000, 0.5);
+//        }
     }
+
 
     public void switchGameMode() {
         // require full press of stick buttons and bumpers to initiate

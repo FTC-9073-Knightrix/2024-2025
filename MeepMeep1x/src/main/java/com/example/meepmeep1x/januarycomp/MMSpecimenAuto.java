@@ -43,19 +43,18 @@ public class MMSpecimenAuto {
                 new TranslationalVelConstraint(20.0),
                 new AngularVelConstraint(Math.PI / 2)
         ));
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(8, -62, forwardAngle))
-                        .lineToY(-32)
-                        .waitSeconds(0.2)
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(4, -62, forwardAngle))
+                        .splineToConstantHeading(new Vector2d(4, -30), forwardAngle)
 
                         // first u turn
-                        .strafeToConstantHeading(new Vector2d(28, -38))
-                        .splineToConstantHeading(new Vector2d(29, -38), rightAngle)
+                        .strafeToConstantHeading(new Vector2d(28, -36))
+                        .splineToConstantHeading(new Vector2d(29, -36), rightAngle)
                         .splineToConstantHeading(new Vector2d(36, -32), forwardAngle)
-                        .splineToConstantHeading(new Vector2d(36, -15), forwardAngle)
-                        .splineToConstantHeading(new Vector2d(44, -15), backwardAngle)
+                        .splineToConstantHeading(new Vector2d(36, -17), forwardAngle)
+                        .splineToConstantHeading(new Vector2d(44, -17), backwardAngle)
                         // down and u turn
-                        .splineToConstantHeading(new Vector2d(44, -56), backwardAngle)
-                        .splineToConstantHeading(new Vector2d(39, -56), forwardAngle)
+                        .splineToConstantHeading(new Vector2d(44, -53), backwardAngle)
+                        .splineToConstantHeading(new Vector2d(39, -53), forwardAngle)
                         // go back up and u turn
                         .splineToConstantHeading(new Vector2d(39, -17), forwardAngle)
                         .splineToConstantHeading(new Vector2d(54, -17), backwardAngle)
@@ -63,8 +62,8 @@ public class MMSpecimenAuto {
                         .splineToConstantHeading(new Vector2d(54, -53), backwardAngle)
                         .splineToConstantHeading(new Vector2d(49, -53), forwardAngle)
                         // go back up and u turn
-                        .splineToConstantHeading(new Vector2d(49, -15), forwardAngle)
-                        .splineToConstantHeading(new Vector2d(61, -15), backwardAngle)
+                        .splineToConstantHeading(new Vector2d(49, -17), forwardAngle)
+                        .splineToConstantHeading(new Vector2d(61, -17), backwardAngle)
                         // down
                         .splineToConstantHeading(new Vector2d(61, -53), backwardAngle)
 

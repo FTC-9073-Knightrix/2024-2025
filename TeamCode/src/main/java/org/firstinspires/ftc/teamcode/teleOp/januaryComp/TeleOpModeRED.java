@@ -9,10 +9,18 @@ public class TeleOpModeRED extends TeleOpMethods {
     @Override
     public void init() {
         super.init();
-        allianceColor = GameColors.RED;
+        allianceColor = GameColors.RED
+        ;
     }
     @Override
     public void loop() {
+        if (gamepad2.dpad_left) {
+            outtakeClawServoRot = incrementServoRot(outtakeClawServoRot, -0.01, 0, 1);
+        }
+        if (gamepad2.dpad_right) {
+            outtakeClawServoRot = incrementServoRot(outtakeClawServoRot, 0.01, 0, 1);
+
+        }
         runMecanumDrive();
 
         getColors();

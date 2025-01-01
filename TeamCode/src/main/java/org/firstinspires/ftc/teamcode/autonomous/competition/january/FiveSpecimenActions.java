@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous.competition.january;
 
+import android.text.method.Touch;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -15,44 +17,47 @@ import com.qualcomm.robotcore.util.Range;
 
 @Config
 public abstract class FiveSpecimenActions extends LinearOpMode {
-    final public int liftUpHeight = -2200;
-    final public int liftOffWallHeight = -500;
-    final public int hookHeight = -2300;
-    final public double clawOpenPosition = 0.55; // TODO CHANGE VALUES ACCORDINGLY
-    final public double clawClosePosition = 0.2;
+    final public int liftUpHeight = -750;
+//    final public int liftOffWallHeight = -500;
+//    final public int hookHeight = -2300;
+    final public double clawOpenPosition = 0.66; // TODO CHANGE VALUES ACCORDINGLY
+    final public double clawClosePosition = 0.3;
 
-    final public double clawArmForwardPosition = 0.0;
+    final public double clawArmStartPosition = 0.08;
+    final public double clawArmForwardPosition = 0.25;
     final public double clawArmBackPosition = 1.0;
+
+    final double clawTwistBearingUp = 1.0;
+    final double clawTwistBearingDown = 0.0;
 
     public static double heading = 0;
 
-    public TouchSensor liftSensor = hardwareMap.touchSensor.get("liftSensor");
 
-//    public int cioqlnwqduhqw
 
     // --------------------------------- VERT LIFT ----------------------------------
     public class VertLinearMotor {
         private final DcMotorEx vertLinearMotor;
+        private final TouchSensor vertSlideSensor;
 
         public VertLinearMotor(HardwareMap hardwareMap) {
             vertLinearMotor = hardwareMap.get(DcMotorEx.class, "vertLinearMotor");
+            vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
             vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
 
-        public class LiftUp implements Action {
+        public class LiftUpToChamber implements Action {
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     vertLinearMotor.setTargetPosition(liftUpHeight);
                     vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     initialized = true;
                 }
                 if (vertLinearMotor.isBusy() && !isStopRequested()) {
-//                    vertLinearMotor.setPower();
+                    vertLinearMotor.setPower(-0.4);
                     return true;
                 } else {
                     vertLinearMotor.setPower(0);
@@ -61,7 +66,7 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             }
         }
         public Action liftUpToChamber() {
-            return new LiftUp();
+            return new LiftUpToChamber();
         }
 
         public class HookOnBar implements Action {
@@ -70,12 +75,11 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    vertLinearMotor.setTargetPosition(hookHeight);
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     initialized = true;
                 }
-                if (vertLinearMotor.isBusy() && !isStopRequested()) {
+                if (!isStopRequested() && !vertSlideSensor.isPressed()) {
+                    vertLinearMotor.setPower(0.4);
                     return true;
                 } else {
                     vertLinearMotor.setPower(0);
@@ -87,72 +91,26 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
         public Action hookOnBar() {
             return new HookOnBar();
         }
-
-        public class LiftDown implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    vertLinearMotor.setPower(-0.8);
-                    initialized = true;
-                }
-                packet.put("liftPos", vertLinearMotor.getCurrentPosition());
-                if (!liftSensor.isPressed() && !isStopRequested()) {
-                    return true;
-                } else {
-                    vertLinearMotor.setPower(0);
-                    vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    return false;
-                }
-            }
-        }
-        public Action liftDown() {
-            return new LiftDown();
-        }
-
-        public class LiftOffWall implements Action {
-            private boolean initialized = false;
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    vertLinearMotor.setPower(-0.8);
-                    vertLinearMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    initialized = true;
-                }
-                if (vertLinearMotor.isBusy() && !isStopRequested()) {
-                    return true;
-                } else {
-                    vertLinearMotor.setPower(0);
-                    return false;
-                }
-            }
-        }
-        public Action liftOffWall() {
-            return new LiftOffWall();
-        }
     }
 
 
     // ----------------------------------- CLAW -----------------------------------
-    public class Claw {
-        private final Servo clawServo;
+    public class OuttakeClawServo {
+        private final Servo outtakeClawServo;
 
-        public Claw(HardwareMap hardwareMap) {
-            clawServo = hardwareMap.get(Servo.class, "clawServo");
+        public OuttakeClawServo(HardwareMap hardwareMap) {
+            outtakeClawServo = hardwareMap.get(Servo.class, "outtakeClawServo");
+            outtakeClawServo.setPosition(clawClosePosition);
         }
 
         public void setPos(double pos) {
-            clawServo.setPosition(Range.clip(pos, 0, 1));
+            outtakeClawServo.setPosition(Range.clip(pos, 0, 1));
         }
 
         public class OpenClaw implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawServo.setPosition(clawOpenPosition);
+                outtakeClawServo.setPosition(clawOpenPosition);
                 return false;
             }
         }
@@ -163,7 +121,7 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
         public class CloseClaw implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawServo.setPosition(clawClosePosition);
+                outtakeClawServo.setPosition(clawClosePosition);
                 return false;
             }
         }
@@ -174,22 +132,31 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
 
 
     // --------------------------------- CLAW ARM ---------------------------------
-    public class ClawArm {
-        final private Servo clawArmServo;
+    public class OuttakeArmServo {
+        final private Servo outtakeArmServo;
 
-        public ClawArm(HardwareMap hardwareMap) {
-            clawArmServo = hardwareMap.get(Servo.class, "clawArmServo");
-            clawArmServo.setPosition(clawArmForwardPosition);
+        public OuttakeArmServo(HardwareMap hardwareMap) {
+            outtakeArmServo = hardwareMap.get(Servo.class, "outtakeArmServo");
+            outtakeArmServo.setPosition(clawArmStartPosition);
         }
 
-        public void setPos(double pos) {
-            clawArmServo.setPosition(Range.clip(pos, 0.0, 1.0));
+        public void setPos(double pos) {outtakeArmServo.setPosition(Range.clip(pos, 0.0, 1.0));}
+
+        public class ClawArmStart implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                outtakeArmServo.setPosition(clawArmStartPosition);
+                return false;
+            }
+        }
+        public Action clawArmStart() {
+            return new ClawArmStart();
         }
 
         public class ClawArmForward implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawArmServo.setPosition(clawArmForwardPosition);
+                outtakeArmServo.setPosition(clawArmForwardPosition);
                 return false;
             }
         }
@@ -200,12 +167,43 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
         public class ClawArmBack implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                clawArmServo.setPosition(clawArmBackPosition);
+                outtakeArmServo.setPosition(clawArmBackPosition);
                 return false;
             }
         }
         public Action clawArmBack() {
             return new ClawArmBack();
         }
+    }
+    // --------------------------------- TWIST ---------------------------------
+    public class OuttakeTwistServo {
+        final private Servo outtakeTwistServo;
+
+        public OuttakeTwistServo(HardwareMap hardwareMap) {
+            outtakeTwistServo = hardwareMap.get(Servo.class, "outtakeTwistServo");
+            outtakeTwistServo.setPosition(clawTwistBearingDown);
+        }
+
+        public void setPos(double pos) {outtakeTwistServo.setPosition(Range.clip(pos, 0.0, 1.0));}
+
+        public class TwistToBearingsUp implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                outtakeTwistServo.setPosition(clawTwistBearingUp);
+                return false;
+            }
+        }
+        public Action twistToBearingsUp() {
+            return new TwistToBearingsUp();
+        }
+
+        public class TwistToBearingsDown implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                outtakeTwistServo.setPosition(clawTwistBearingDown);
+                return false;
+            }
+        }
+        public Action twistToBearingsDown() {return new TwistToBearingsDown();}
     }
 }
