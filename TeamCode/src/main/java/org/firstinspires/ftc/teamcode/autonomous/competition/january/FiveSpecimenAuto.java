@@ -29,12 +29,12 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
     public void runOpMode() throws InterruptedException {
 
 
-        Pose2d beginPose = new Pose2d(0, 0, forwardAngle);
+        Pose2d beginPose = new Pose2d(4, 62, forwardAngle);
         PinpointDrive drive = new PinpointDrive(hardwareMap, beginPose);
-//        VertLinearMotor vertLinearMotor = new VertLinearMotor(hardwareMap);
-//        OuttakeClawServo outtakeClawServo = new OuttakeClawServo(hardwareMap);
-//        OuttakeArmServo outtakeArmServo = new OuttakeArmServo(hardwareMap);
-//        OuttakeTwistServo outtakeTwistServo = new OuttakeTwistServo(hardwareMap);
+        VertLinearMotor vertLinearMotor = new VertLinearMotor(hardwareMap);
+        OuttakeClawServo outtakeClawServo = new OuttakeClawServo(hardwareMap);
+        OuttakeArmServo outtakeArmServo = new OuttakeArmServo(hardwareMap);
+        OuttakeTwistServo outtakeTwistServo = new OuttakeTwistServo(hardwareMap);
 
         VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
                 new TranslationalVelConstraint(20.0),
@@ -44,11 +44,11 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
 //        TrajectoryActionBuilder ToBarTraj1 = drive.actionBuilder(beginPose)
 //            .strafeToConstantHeading(new Vector2d(4, -30));
         Action ToBarAction1 = drive.actionBuilder(beginPose)
-                .splineToConstantHeading(new Vector2d(0, 50), forwardAngle)
+                .splineToConstantHeading(new Vector2d(2, 30), forwardAngle)
 //                .strafeToConstantHeading(new Vector2d(20, 0))
                 .build();
         // Robot drives to push the 3 samples into the observation zone
-        Action PushBlocksAction = drive.actionBuilder(new Pose2d(4, -30, forwardAngle))
+        Action ToObservation = drive.actionBuilder(new Pose2d(4, -30, forwardAngle))
                 // first u turn
                 .strafeToConstantHeading(new Vector2d(28, -36))
                 .splineToConstantHeading(new Vector2d(29,  -36), rightAngle)
@@ -74,35 +74,6 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
 //                .strafeToConstantHeading(new Vector2d(40, -58), baseVelConstraint)
                 .build();
 
-
-//        // Robot drives to the observation zone to pick up the 2nd spec
-//        TrajectoryActionBuilder ToObsvTraj1 = PushBlocksTraj.endTrajectory().fresh();
-//
-//
-//        // Starts repeating
-//        // Robot drives to the chamber to hook 2nd Spec
-//        TrajectoryActionBuilder ToBarTraj2 = ToObsvTraj1.endTrajectory().fresh();
-//
-//        // Robot drives to the observation zone to pick up the 3rd spec
-//        TrajectoryActionBuilder ToObsvTraj2 = ToBarTraj2.endTrajectory().fresh();
-//
-//        // Robot drives to the chamber to hook 3rd Spec
-//        TrajectoryActionBuilder ToBarTraj3 = ToObsvTraj2.endTrajectory().fresh();
-//
-//        // Robot drives to the observation zone to pick up the 4th spec
-//        TrajectoryActionBuilder ToObsvTraj3 = ToBarTraj3.endTrajectory().fresh();
-//
-//        // Robot drives to the chamber to hook the 4th spec
-//        TrajectoryActionBuilder ToBarTraj4 = ToObsvTraj3.endTrajectory().fresh();
-//
-//        // Robot drives to the observation zone to pick up the 5th spec
-//        TrajectoryActionBuilder ToObsvTraj4 = ToBarTraj4.endTrajectory().fresh();
-//
-//        // Robot drives to the chamber to hook the 5th spec
-//        TrajectoryActionBuilder ToBarTraj5 = ToObsvTraj4.endTrajectory().fresh();
-//
-//        // Robot drives to observation zone to park the robot
-//        TrajectoryActionBuilder ParkTraj = ToBarTraj5.endTrajectory().fresh();
 
         if (opModeInInit()) {
 //            drive.pinpoint.resetP

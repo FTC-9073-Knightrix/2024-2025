@@ -50,7 +50,7 @@ public abstract class TeleOpHardwareMap extends OpMode {
     public DistanceSensor intakeDistanceSensor;
 
     //Create the gyroscope
-//    public IMU imu;
+    public IMU imu;
     public GoBildaPinpointDriver pinpoint;
 
     //Create the orientation variable for the robot position
@@ -100,13 +100,13 @@ public abstract class TeleOpHardwareMap extends OpMode {
 //        pinpointDrive = new PinpointDrive()
 
 //        //Add the gyroscope to the configuration on the phones
-//        imu = hardwareMap.get(IMU.class, "imu");
-//        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
-//        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
-//
-//        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
-//
-//        imu.initialize(new IMU.Parameters(orientationOnRobot));
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.DOWN;
+
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
 
         vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         horizLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

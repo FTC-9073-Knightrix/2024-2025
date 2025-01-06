@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.Locale;
@@ -119,7 +120,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     // Outtake variables
     final double OUTTAKE_ARM_BACK = 0.96;
-    final double OUTTAKE_ARM_HOOK = 0.24;
+    final double OUTTAKE_ARM_HOOK = 0.235;
     final double OUTTAKE_ARM_DEFAULT = 0.15;
     final double OUTTAKE_ARM_TRANSFER = 0.0;
 
@@ -167,7 +168,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     // TODO ---------------------------------------MECANUM DRIVE ---------------------------------------
     public void runMecanumDrive(){
         // Only update the heading because that is all you need in Teleop
-        pinpoint.update(GoBildaPinpointDriver.readData.ONLY_UPDATE_HEADING);
+//        pinpoint.update(GoBildaPinpointDriver.readData.ONLY_UPDATE_HEADING);
 
         //Setting boolean hold
         if(gamepad1.right_bumper) {
@@ -188,13 +189,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         double rx = gamepad1.right_stick_x * .8;
 
         if (gamepad1.y) {
-//            imu.resetYaw();
-            pinpoint.resetPosAndIMU();
+            imu.resetYaw();
+//            pinpoint.resetPosAndIMU();
         }
 
-//        orientation = imu.getRobotYawPitchRollAngles();
-//        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-        double botHeading = pinpoint.getHeading();
+        orientation = imu.getRobotYawPitchRollAngles();
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//        double botHeading = pinpoint.getHeading();
 
         double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
         double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
@@ -337,7 +338,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
                     specimenFSM.setJustSwitched(false);
                 }
-                if (gamepad1.x) {
+                if (gamepad1.right_trigger>0.5) {
                     if (gameMode == GameMode.SAMPLE) return;
                     specimenFSM.setState(SpecimenFSM.SpecimenState.GRAB_AND_FLIP);
                     specimenFSM.setJustSwitched(true);
@@ -360,9 +361,9 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 } else {
                     vertLinearPower = 0.0;
                 }
-                if (specimenFSM.timer.seconds() > 0.25 ) {
+                if (specimenFSM.timer.seconds() > 0.5 ) {
                     outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
-                    if (gamepad1.b) {
+                    if (gamepad1.left_trigger > 0.5) {
                         specimenFSM.setState(SpecimenFSM.SpecimenState.SPECIMEN_HANG);
                         specimenFSM.setJustSwitched(true);
                     }
@@ -428,9 +429,9 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         }
         // Stop overextension and over retraction of horizontal linear motor
         if (gamepad2.right_stick_y > 0 && !horizSlideSensor.isPressed()) {
-            horizLinearPower = gamepad2.right_stick_y * 0.6;
+            horizLinearPower = gamepad2.right_stick_y * 0.7;
         } else if (gamepad2.right_stick_y < 0.0 && liftPosHoriz < HORIZ_MAX) {
-            horizLinearPower = gamepad2.right_stick_y * 0.6;
+            horizLinearPower = gamepad2.right_stick_y * 0.7;
         } else { horizLinearPower = 0.0;}
     }
 
@@ -479,12 +480,12 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     }
 
     public void runIntakeTwist() {
-//        if (gamepad2.right_bumper) {
-//            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -0.015, 0.0, 1.0);
-//        }
-//        else if (gamepad2.left_bumper) {
-//            intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, 0.015, 0.0, 1.0);
-//        }
+        if (gamepad2.right_bumper) {
+            intakeTwistServoRot = 0.93;
+        }
+        else if (gamepad2.left_bumper) {
+            intakeTwistServoRot = INTAKE_TWIST_STRAIGHT;
+        }
         intakeTwistServoRot = incrementServoRot(intakeTwistServoRot, -gamepad2.left_stick_x * 0.02, 0.0, 1.0 );
 
     }
@@ -594,7 +595,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
     public void addTelemetryToDriverStation() {
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("Heading: ", String.format(Locale.US, "%.2f", Math.toDegrees(pinpoint.getHeading())));
+//        telemetry.addData("Heading: ", String.format(Locale.US, "%.2f", Math.toDegrees(pinpoint.getHeading())));
         telemetry.addData("Slowmode: ", finalSlowMode);
         telemetry.addData("Gamemode:", gameMode);
 
