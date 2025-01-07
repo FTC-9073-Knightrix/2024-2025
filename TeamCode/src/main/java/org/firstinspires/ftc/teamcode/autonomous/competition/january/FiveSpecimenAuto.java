@@ -37,7 +37,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
         OuttakeTwistServo outtakeTwistServo = new OuttakeTwistServo(hardwareMap);
 
         VelConstraint baseVelConstraint = new MinVelConstraint(Arrays.asList(
-                new TranslationalVelConstraint(20.0),
+                new TranslationalVelConstraint(30.0),
                 new AngularVelConstraint(Math.PI / 2)
         ));
         // Robot drives to the chamber to hook 1st spec
@@ -48,13 +48,13 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
 //                .strafeToConstantHeading(new Vector2d(20, 0))
                 .build();
         // Robot drives to push the 3 samples into the observation zone
-        Action ToObservation = drive.actionBuilder(new Pose2d(4, -30, forwardAngle))
+        TrajectoryActionBuilder ToObservationTraj = drive.actionBuilder(new Pose2d(4, -30, forwardAngle))
                 // first u turn
-                .strafeToConstantHeading(new Vector2d(28, -36))
-                .splineToConstantHeading(new Vector2d(29,  -36), rightAngle)
-                .splineToConstantHeading(new Vector2d(36, -32), forwardAngle)
-                .splineToConstantHeading(new Vector2d(36, -16), forwardAngle)
-                .splineToConstantHeading(new Vector2d(46, -16), backwardAngle)
+                .strafeToConstantHeading(new Vector2d(28, -36), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(29,  -36), rightAngle, baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(36, -32), forwardAngle, baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(36, -16), forwardAngle, baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(46, -16), backwardAngle, baseVelConstraint);
 //                // down and u turn
 //                .splineToConstantHeading(new Vector2d(46, -53), backwardAngle)
 //                .splineToConstantHeading(new Vector2d(41, -53), forwardAngle)
@@ -72,7 +72,6 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
 //
 //                // pickup 1
 //                .strafeToConstantHeading(new Vector2d(40, -58), baseVelConstraint)
-                .build();
 
 
         if (opModeInInit()) {

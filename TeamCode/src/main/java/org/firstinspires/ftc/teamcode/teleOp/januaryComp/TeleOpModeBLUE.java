@@ -18,6 +18,7 @@ public class TeleOpModeBLUE extends TeleOpMethods {
         getColors();
         runIntakeOuttake();
         runSpecimens();
+        verticalSlideSystem();
         horizontalSlideSystem();
         switchGameMode();
         endGame();

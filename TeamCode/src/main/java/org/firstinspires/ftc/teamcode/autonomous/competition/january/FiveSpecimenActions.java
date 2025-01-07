@@ -21,7 +21,7 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
 //    final public int liftOffWallHeight = -500;
 //    final public int hookHeight = -2300;
     final public double clawOpenPosition = 0.66; // TODO CHANGE VALUES ACCORDINGLY
-    final public double clawClosePosition = 0.3;
+    final public double clawClosePosition = 0.32;
 
     final public double clawArmStartPosition = 0.08;
     final public double clawArmForwardPosition = 0.25;
@@ -44,6 +44,7 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
             vertSlideSensor = hardwareMap.get(TouchSensor.class, "vertSlideSensor");
             vertLinearMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
         public class LiftUpToChamber implements Action {
@@ -79,7 +80,7 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
                     initialized = true;
                 }
                 if (!isStopRequested() && !vertSlideSensor.isPressed()) {
-                    vertLinearMotor.setPower(0.4);
+                    vertLinearMotor.setPower(0.7);
                     return true;
                 } else {
                     vertLinearMotor.setPower(0);

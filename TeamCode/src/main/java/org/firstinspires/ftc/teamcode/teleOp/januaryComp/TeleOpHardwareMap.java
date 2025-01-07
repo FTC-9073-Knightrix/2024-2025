@@ -97,7 +97,6 @@ public abstract class TeleOpHardwareMap extends OpMode {
         rightBack.setInverted(true);
 
         mecanumDrive = new MecanumDrive(leftFront, rightFront, leftBack, rightBack);
-//        pinpointDrive = new PinpointDrive()
 
 //        //Add the gyroscope to the configuration on the phones
         imu = hardwareMap.get(IMU.class, "imu");
