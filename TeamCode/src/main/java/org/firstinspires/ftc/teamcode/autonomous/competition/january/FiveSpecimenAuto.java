@@ -29,7 +29,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
     public void runOpMode() throws InterruptedException {
 
 
-        Pose2d beginPose = new Pose2d(4, 62, forwardAngle);
+        Pose2d beginPose = new Pose2d(4, 62, rightAngle);
         PinpointDrive drive = new PinpointDrive(hardwareMap, beginPose);
         VertLinearMotor vertLinearMotor = new VertLinearMotor(hardwareMap);
         OuttakeClawServo outtakeClawServo = new OuttakeClawServo(hardwareMap);
@@ -44,7 +44,7 @@ public class FiveSpecimenAuto extends FiveSpecimenActions {
 //        TrajectoryActionBuilder ToBarTraj1 = drive.actionBuilder(beginPose)
 //            .strafeToConstantHeading(new Vector2d(4, -30));
         Action ToBarAction1 = drive.actionBuilder(beginPose)
-                .splineToConstantHeading(new Vector2d(2, 30), forwardAngle)
+                .splineToConstantHeading(new Vector2d(4, 30), forwardAngle)
 //                .strafeToConstantHeading(new Vector2d(20, 0))
                 .build();
         // Robot drives to push the 3 samples into the observation zone

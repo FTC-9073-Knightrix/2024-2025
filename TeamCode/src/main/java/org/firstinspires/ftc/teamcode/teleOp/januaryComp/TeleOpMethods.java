@@ -122,7 +122,8 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     final double INTAKE_ARM_DEFAULT = 0.55;
     double dM  = -0.0000527924; // slope for dynamic arm movement linear equation, where x is the horiz lift position
     double dB = 0.731142; // y intercept for dynamic arm movement linear equation, where x is the horiz lift position
-    double intakeArmHoverDynamic = dM * 0 + dB; // Times zero for position 0 on the slide
+//    double intakeArmHoverDynamic = dM * 0 + dB; // Times zero for position 0 on the slide
+    double intakeArmHoverDynamic = 0.63; // Times zero for position 0 on the slide
     boolean intakeArmIsHovering = false;
     final double INTAKE_ARM_TRANSFER = 0.0;
 
@@ -363,9 +364,10 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     vertLinearPower = 0.7;
                     intakeOuttakeFSM.justSwitched = false;
                 }
-                if (intakeOuttakeFSM.timer.seconds() > 0.3) {
+                if (intakeOuttakeFSM.timer.seconds() > 0.25) {
                     outtakeClawServoRot = OUTTAKE_CLAW_CLOSE;
                     intakeClawServoRot = INTAKE_CLAW_OPEN;
+                    vertLinearPower = 0;
                 }
                 if (intakeOuttakeFSM.timer.seconds() > 0.7) {
                     outtakeArmServoRot = OUTTAKE_ARM_HELD_UP;
@@ -390,7 +392,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                         g2BPreviouslyPressed = true;
                     }
                 } else {
-                    // warning to let drivers know
+                    // warning to let drivers know extending outside box
                     rumbleGamePads(250, 1.0);
                 }
 
@@ -628,7 +630,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         vertLinearMotor.setPower(vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
 
-        updateDynamicIntakeArmPosition();
+//        updateDynamicIntakeArmPosition();
     }
 
     private boolean sampleColorIsAcceptable() {
