@@ -23,11 +23,14 @@ public class MMSpecimenAuto {
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
+                .setDimensions(17.5, 18)
                 .setConstraints(50, 50, Math.PI, Math.PI, 15)
                 .build();
 
         // Run meep meep method here
-        fiveSpecimenFlippingClaw(myBot);
+//        fiveSpecimenFlippingClaw(myBot);
+//        fourSpecimenFlippingClawField(myBot);
+        fourSpecimenFlippingClawZerod(myBot);
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                 .setDarkMode(true)
@@ -91,7 +94,141 @@ public class MMSpecimenAuto {
                  .build());
     }
 
-    public static void fourSpecimenFlippingClaw (RoadRunnerBotEntity myBot) {
+    // Subtract 90 degrees from field heading
+    // Add 62 to y, flip sign of x then add 4 to x
+    // Then, flip x and y
+    public static void fourSpecimenFlippingClawField (RoadRunnerBotEntity myBot) {
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(4, -62, Math.toRadians(90)))
+                // To bar 1
+                .splineToConstantHeading(new Vector2d(4, -30), Math.toRadians(90))
 
+                // Curve out
+                .setTangent(Math.toRadians(310))
+                .splineToConstantHeading(new Vector2d(35.5, -40), 0)
+
+                // Straight forward
+                .strafeToConstantHeading(new Vector2d(35.5, -20))
+
+                // ( curve
+                .setTangent(Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(39, -12), Math.toRadians(0))
+                // ) curve
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(45, -20), Math.toRadians(270))
+                // Straight back
+                .strafeToConstantHeading(new Vector2d(45, -56))
+
+                // Straight forward 2
+                .strafeToConstantHeading(new Vector2d(45, -20))
+
+                // ( curve 2
+                .setTangent(Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(50, -12), Math.toRadians(0))
+                // ) curve 2
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(55, -20), Math.toRadians(270))
+
+                // Straight back 2
+                .strafeToConstantHeading(new Vector2d(55, -56))
+
+                // To Left
+                .strafeToConstantHeading(new Vector2d(40, -56))
+
+                // Back into zone
+                .strafeToConstantHeading(new Vector2d(40, -61))
+
+                // To bar 2
+                .strafeToConstantHeading(new Vector2d(1, -45))
+                .strafeToConstantHeading(new Vector2d(1, -30))
+
+                // Back To zone
+                .strafeToConstantHeading(new Vector2d(40, -56))
+                .strafeToConstantHeading(new Vector2d(40, -61))
+
+                // To bar 3
+                .strafeToConstantHeading(new Vector2d(-2, -45))
+                .strafeToConstantHeading(new Vector2d(-2, -30))
+
+                // Back To zone
+                .strafeToConstantHeading(new Vector2d(40, -56))
+                .strafeToConstantHeading(new Vector2d(40, -61))
+
+                // To bar 4
+                .strafeToConstantHeading(new Vector2d(-4, -45))
+                .strafeToConstantHeading(new Vector2d(-4, -30))
+
+                // Back To zone
+                .strafeToConstantHeading(new Vector2d(43, -56))
+                .build()
+        );
+    }
+    public static void fourSpecimenFlippingClawZerod (RoadRunnerBotEntity myBot) {
+        // - 4 x, + 62 y
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(0, 0, Math.toRadians(0)))
+                // To bar 1
+                .splineToConstantHeading(new Vector2d(32, 0), 0)
+
+                // Curve out
+                .setTangent(Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(22, -31.5), Math.toRadians(270))
+
+                // Straight forward
+                .strafeToConstantHeading(new Vector2d(42, -31.5))
+
+                // ( curve
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(50, -35), Math.toRadians(270))
+                // ) curve
+                .setTangent(Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(42, -41), Math.toRadians(180))
+                // Straight back
+                .strafeToConstantHeading(new Vector2d(6, -41))
+
+
+                // Straight forward 2
+                .strafeToConstantHeading(new Vector2d(42, -41))
+
+                // ( curve 2
+                .setTangent(Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(48, -46), Math.toRadians(270))
+                // ) curve 2
+                .setTangent(Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(42, -51), Math.toRadians(180))
+
+                // Straight back 2
+                .strafeToConstantHeading(new Vector2d(6, -51))
+
+                // To Left
+                .strafeToConstantHeading(new Vector2d(6, -36))
+
+                // Back into zone
+                .strafeToConstantHeading(new Vector2d(1, -36))
+
+                // To bar 2
+                .strafeToConstantHeading(new Vector2d(25, 3))
+
+
+                .strafeToConstantHeading(new Vector2d(32, 3))
+//
+//                // Back To zone
+//                .strafeToConstantHeading(new Vector2d(40, -56))
+//                .strafeToConstantHeading(new Vector2d(40, -61))
+//
+//                // To bar 3
+//                .strafeToConstantHeading(new Vector2d(-2, -45))
+//                .strafeToConstantHeading(new Vector2d(-2, -30))
+//
+//                // Back To zone
+//                .strafeToConstantHeading(new Vector2d(40, -56))
+//                .strafeToConstantHeading(new Vector2d(40, -61))
+//
+//                // To bar 4
+//                .strafeToConstantHeading(new Vector2d(-4, -45))
+//                .strafeToConstantHeading(new Vector2d(-4, -30))
+//
+//                // Back To zone
+//                .strafeToConstantHeading(new Vector2d(43, -56))
+                .build()
+        );
     }
 }

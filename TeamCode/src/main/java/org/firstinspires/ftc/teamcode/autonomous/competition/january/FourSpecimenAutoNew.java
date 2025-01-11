@@ -17,8 +17,12 @@ import org.firstinspires.ftc.teamcode.autonomous.PinpointDrive;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Five Specimen Auto")
-public class FiveSpecimenAuto extends AutoActions {
+@Autonomous(name = "Four Specimen Auto Optimized")
+public class FourSpecimenAutoNew extends AutoActions {
+//    final double forwardAngle = Math.toRadians(90);
+//    final double backwardAngle = Math.toRadians(270);
+//    final double rightAngle = Math.toRadians(0);
+//    final double leftAngle = Math.toRadians(180);
 
     @Override
     public void runOpMode() throws InterruptedException {

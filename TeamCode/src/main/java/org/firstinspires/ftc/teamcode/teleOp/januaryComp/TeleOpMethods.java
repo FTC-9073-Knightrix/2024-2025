@@ -109,21 +109,21 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     // Drive train speeds
     final double driveSpeed = 0.66;
     final double fastSpeed = 1.0;
-    final double slowSpeed = 0.45;
+    final double slowSpeed = 0.35;
     double finalSlowMode = 0.0;
 
     // Intake variables
-    final double INTAKE_CLAW_CLOSE = 0.54;
-    final double INTAKE_CLAW_OPEN = 1.0;
+    final double INTAKE_CLAW_CLOSE = 0;
+    final double INTAKE_CLAW_OPEN = 0.35;
 
     final double INTAKE_TWIST_STRAIGHT = 0.5;
 
     final double INTAKE_ARM_DOWN = 0.85;
     final double INTAKE_ARM_DEFAULT = 0.55;
-    double dM  = -0.0000527924; // slope for dynamic arm movement linear equation, where x is the horiz lift position
+    double dM  = -0.0000227924; // slope for dynamic arm movement linear equation, where x is the horiz lift position
     double dB = 0.731142; // y intercept for dynamic arm movement linear equation, where x is the horiz lift position
-//    double intakeArmHoverDynamic = dM * 0 + dB; // Times zero for position 0 on the slide
-    double intakeArmHoverDynamic = 0.63; // Times zero for position 0 on the slide
+    double intakeArmHoverDynamic = dM * 0 + dB; // Times zero for position 0 on the slide
+//    double intakeArmHoverDynamic = 0.68; // Times zero for position 0 on the slide
     boolean intakeArmIsHovering = false;
     final double INTAKE_ARM_TRANSFER = 0.0;
 
@@ -136,11 +136,11 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     final double OUTTAKE_ARM_BACK = 1.00;
     final double OUTTAKE_ARM_HELD_UP = 0.45;
     final double OUTTAKE_ARM_DUMP = 0.78;
-    final double OUTTAKE_ARM_HOOK = 0.26;
+    final double OUTTAKE_ARM_HOOK = 0.29;
     final double OUTTAKE_ARM_DEFAULT = 0.10;
     final double OUTTAKE_ARM_TRANSFER = 0.0;
 
-    final double OUTTAKE_CLAW_CLOSE = 0.15;
+    final double OUTTAKE_CLAW_CLOSE = 0.25;
     final double OUTTAKE_CLAW_LOOSE_CLOSE = 0.25;
     final double OUTTAKE_CLAW_OPEN = 0.66;
 
@@ -166,14 +166,14 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     double vertLinearPower = 0.0;
     final double stopSlideFallingPower = -0.12;
     final int VERT_MAX = -3500;
-    final int TRANSFER_TARGET = -500;
+    final int TRANSFER_TARGET = -725;
     final int HIGH_SPECIMEN_GRAB_TARGET = -150;
-    final int HOOK_TARGET = -750;
+    final int HOOK_TARGET = -675;
 
     // Intake Color Sensor
     final float minColorIntensity = 0.2F;
     NormalizedRGBA colors = new NormalizedRGBA();
-    boolean useColorSensor = true;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
+    boolean useColorSensor = false;  // Choose whether to let the color sensor make judgements on the block to automatically reject it
     enum GameColors {RED, BLUE, NONE}
     GameColors colorMatch = GameColors.NONE;
     GameColors allianceColor; // MUST be initialized in Op Mode as only RED or BLUE
@@ -336,21 +336,21 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 if (vertLinearMotor.isBusy()) {vertLinearPower = -0.7;} else {vertLinearPower = stopSlideFallingPower;}
 
                 if (intakeArmServoRot > INTAKE_ARM_TRANSFER){
-                    intakeArmServoRot = incrementServoRot(intakeArmServoRot, -0.05, INTAKE_ARM_TRANSFER, 1.0);
+                    intakeArmServoRot = incrementServoRot(intakeArmServoRot, -0.03, INTAKE_ARM_TRANSFER, 1.0);
                 } else {
                     intakeArmServoRot = INTAKE_ARM_TRANSFER;
                 }
 
                 // only runs if the slide had to extend outward
-                if (intakeOuttakeFSM.timer.seconds() > 0.15 && horizLinearPower <= 0.0) {
+                if (intakeOuttakeFSM.timer.seconds() > 0.25 && horizLinearPower <= 0.0) {
                     horizLinearPower = 1.0;
                 }
                 // wait for arm to come back before sliding
-                if (intakeOuttakeFSM.timer.seconds() > 0.75 && horizLinearPower == 0) {
+                if (intakeOuttakeFSM.timer.seconds() > 1.25 && horizLinearPower == 0) {
                     horizLinearPower = 1.0;
                 }
 
-                if (horizSlideSensor.isPressed() && intakeArmServoRot <= INTAKE_ARM_TRANSFER) {
+                if (intakeOuttakeFSM.timer.seconds() > 1.5  && horizSlideSensor.isPressed() && intakeArmServoRot <= INTAKE_ARM_TRANSFER) {
                     horizLinearPower = 0;
                     vertLinearMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.TRANSFER);
@@ -369,7 +369,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     intakeClawServoRot = INTAKE_CLAW_OPEN;
                     vertLinearPower = 0;
                 }
-                if (intakeOuttakeFSM.timer.seconds() > 0.7) {
+                if (intakeOuttakeFSM.timer.seconds() > 0.75) {
                     outtakeArmServoRot = OUTTAKE_ARM_HELD_UP;
                     intakeArmServoRot = INTAKE_ARM_DEFAULT;
                     intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.LIFT);
@@ -389,6 +389,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                 if (passesExtensionLimit()) {
                     if (gamepad2.b && !g2BPreviouslyPressed) {
                         outtakeArmServoRot = OUTTAKE_ARM_DUMP;
+                        outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_DOWN;
                         g2BPreviouslyPressed = true;
                     }
                 } else {
@@ -406,10 +407,12 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
 
                 if (intakeOuttakeFSM.sampleDumped && intakeOuttakeFSM.timer.seconds() > 0.5) {
                     outtakeArmServoRot = OUTTAKE_ARM_TRANSFER;
+                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
                 }
 
                 if (intakeOuttakeFSM.sampleDumped && vertSlideSensor.isPressed()) {
                     intakeOuttakeFSM.sampleDumped = false;
+                    vertLinearPower = 0;
                     intakeOuttakeFSM.setState(IntakeOuttakeFSM.IntakeOuttakeState.DEFAULT);
 //                    intakeOuttakeFSM.setJustSwitched(true);
                 }
@@ -630,7 +633,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         vertLinearMotor.setPower(vertLinearPower);
         horizLinearMotor.setPower(horizLinearPower);
 
-//        updateDynamicIntakeArmPosition();
+        updateDynamicIntakeArmPosition();
     }
 
     private boolean sampleColorIsAcceptable() {

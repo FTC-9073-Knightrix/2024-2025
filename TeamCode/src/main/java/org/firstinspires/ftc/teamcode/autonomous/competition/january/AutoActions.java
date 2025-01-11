@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.autonomous.competition.january;
 
-import android.text.method.Touch;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -16,15 +14,15 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
 
 @Config
-public abstract class FiveSpecimenActions extends LinearOpMode {
-    final public int liftUpHeight = -750;
+public abstract class AutoActions extends LinearOpMode {
+    final public int liftUpHeight = -725;
 //    final public int liftOffWallHeight = -500;
 //    final public int hookHeight = -2300;
     final public double clawOpenPosition = 0.66; // TODO CHANGE VALUES ACCORDINGLY
-    final public double clawClosePosition = 0.32;
+    final public double clawClosePosition = 0.25;
 
     final public double clawArmStartPosition = 0.08;
-    final public double clawArmForwardPosition = 0.25;
+    final public double clawArmForwardPosition = 0.29;
     final public double clawArmBackPosition = 1.0;
 
     final double clawTwistBearingUp = 1.0;
@@ -58,10 +56,10 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
                     initialized = true;
                 }
                 if (vertLinearMotor.isBusy() && !isStopRequested()) {
-                    vertLinearMotor.setPower(-0.4);
+                    vertLinearMotor.setPower(-0.7);
                     return true;
                 } else {
-                    vertLinearMotor.setPower(0);
+                    vertLinearMotor.setPower(-0.12);
                     return false;
                 }
             }
@@ -80,9 +78,10 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
                     initialized = true;
                 }
                 if (!isStopRequested() && !vertSlideSensor.isPressed()) {
-                    vertLinearMotor.setPower(0.7);
+                    vertLinearMotor.setPower(1.0);
                     return true;
                 } else {
+                    vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     vertLinearMotor.setPower(0);
                     return false;
                 }
@@ -102,10 +101,6 @@ public abstract class FiveSpecimenActions extends LinearOpMode {
         public OuttakeClawServo(HardwareMap hardwareMap) {
             outtakeClawServo = hardwareMap.get(Servo.class, "outtakeClawServo");
             outtakeClawServo.setPosition(clawClosePosition);
-        }
-
-        public void setPos(double pos) {
-            outtakeClawServo.setPosition(Range.clip(pos, 0, 1));
         }
 
         public class OpenClaw implements Action {
