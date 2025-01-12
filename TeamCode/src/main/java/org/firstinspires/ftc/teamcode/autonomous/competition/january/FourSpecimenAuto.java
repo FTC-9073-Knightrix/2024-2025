@@ -79,28 +79,28 @@ public class FourSpecimenAuto extends AutoActions {
                 .strafeToConstantHeading(new Vector2d(6, -36))
 
                 // Back into zone
-                .strafeToConstantHeading(new Vector2d(1, -36))
+                .strafeToConstantHeading(new Vector2d(1.5, -36))
                 .build();
 
-        Action ToBar1 = drive.actionBuilder(new Pose2d(1, -36, 0))
+        Action ToBar1 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
                 .strafeToConstantHeading(new Vector2d(25, 2))
                 .strafeToConstantHeading(new Vector2d(32, 2))
                 .build();
 
         Action ToZone1 = drive.actionBuilder(new Pose2d(32, 2, 0))
-                .strafeToConstantHeading(new Vector2d(1, -36))
+                .strafeToConstantHeading(new Vector2d(1.5, -36))
                 .build();
 
-        Action ToBar2 = drive.actionBuilder(new Pose2d(1, -36, 0))
+        Action ToBar2 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
                 .strafeToConstantHeading(new Vector2d(25, 4))
                 .strafeToConstantHeading(new Vector2d(32, 4))
                 .build();
 
         Action ToZone2 = drive.actionBuilder(new Pose2d(32, 4, 0))
-                .strafeToConstantHeading(new Vector2d(1, -36))
+                .strafeToConstantHeading(new Vector2d(1.5, -36))
                 .build();
 
-        Action ToBar3 = drive.actionBuilder(new Pose2d(1, -36, 0))
+        Action ToBar3 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
                 .strafeToConstantHeading(new Vector2d(25, 6))
                 .strafeToConstantHeading(new Vector2d(32, 6))
                 .build();

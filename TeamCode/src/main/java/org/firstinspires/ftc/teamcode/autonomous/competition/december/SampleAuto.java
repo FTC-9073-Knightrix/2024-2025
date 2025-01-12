@@ -6,12 +6,14 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.autonomous.AutoMethods;
 import org.firstinspires.ftc.teamcode.autonomous.MecanumDrive;
 
 @Autonomous(name="SampleAuto", group="Autonomous")
+@Disabled
 public class SampleAuto extends AutoMethods {
 
     @Override
