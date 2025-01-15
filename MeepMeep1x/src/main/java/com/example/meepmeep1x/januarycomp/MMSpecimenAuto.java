@@ -42,7 +42,8 @@ public class MMSpecimenAuto {
 
     // Link to auto that is attempting to be implemented
     // https://www.youtube.com/watch?v=xO0BuFX0f84 and https://www.youtube.com/watch?v=J1zYPewDfEA
-    public static void fiveSpecimenFlippingClaw (RoadRunnerBotEntity myBot) {
+    public static void fiveSpecimenFlippingClaw (RoadRunnerBotEntity myBot)
+    {
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(4, -62, forwardAngle))
                         .splineToConstantHeading(new Vector2d(4, -30), forwardAngle)
 
@@ -167,6 +168,7 @@ public class MMSpecimenAuto {
 
                 // Curve out
                 .setTangent(Math.toRadians(180))
+
                 .splineToConstantHeading(new Vector2d(32, -32), Math.toRadians(0))
                 // Straight forward
                 .strafeToConstantHeading(new Vector2d(42, -32))
@@ -200,18 +202,19 @@ public class MMSpecimenAuto {
                 .splineToConstantHeading(new Vector2d(48, -54.5), Math.toRadians(270))
                 // ) curve 3
                 .setTangent(Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(42, -56.5), Math.toRadians(180))
+                .splineToConstantHeading(new Vector2d(42, -56), Math.toRadians(180))
 
                 // Straight back 3
-                .strafeToConstantHeading(new Vector2d(15, -56.5))
+                .strafeToConstantHeading(new Vector2d(15, -56))
 
                 // Curve into the zone
                 .setTangent(Math.toRadians(180))
                 .splineToConstantHeading(new Vector2d(2, -36), Math.toRadians(120))
 
-                .strafeToConstantHeading(new Vector2d(30, 0))
+                .strafeToConstantHeading(new Vector2d(24, -4))
 
-                .splineToConstantHeading(new Vector2d(32, 2.5), 0)
+                .splineToConstantHeading(new Vector2d(31, 2.5), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(32, 2.5), Math.toRadians(0))
 
                 .strafeToConstantHeading(new Vector2d(2, -36))
 

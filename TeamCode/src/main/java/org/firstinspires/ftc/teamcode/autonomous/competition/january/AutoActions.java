@@ -22,7 +22,7 @@ public abstract class AutoActions extends LinearOpMode {
     final public double clawClosePosition = 0.25;
 
     final public double clawArmStartPosition = 0.08;
-    final public double clawArmForwardPosition = 0.29;
+    final public double clawArmForwardPosition = 0.275;
     final public double clawArmBackPosition = 1.0;
 
     final double clawTwistBearingUp = 1.0;

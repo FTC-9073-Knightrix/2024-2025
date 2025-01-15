@@ -55,14 +55,16 @@ public class FiveSpecimenAuto extends AutoActions {
                 new AngularVelConstraint(Math.PI / 2)
         ));
 
-        AccelConstraint maxAccelConstraint = new ProfileAccelConstraint(-10.0, 25.0);
+        AccelConstraint backToZoneAccelConstraint = new ProfileAccelConstraint(-30, 70);
+        AccelConstraint maxAccelConstraint = new ProfileAccelConstraint(-40.0, 70);
 
-        Action ToBarAction1 = drive.actionBuilder(new Pose2d(0, 0, 0))
+        Action PreloadHookLine = drive.actionBuilder(new Pose2d(0, 0, 0))
                 // To Bar 1
-                .splineToConstantHeading(new Vector2d(32, 0), 0, maxSpeedConstraint)
+                .splineToConstantHeading(new Vector2d(32, 0), 0, maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action PushBlocks = drive.actionBuilder(new Pose2d(32, 0, 0))
+
                 // Curve out
                 .setTangent(Math.toRadians(180))
                 .splineToConstantHeading(new Vector2d(32, -32), Math.toRadians(0), baseVelConstraint)
@@ -76,7 +78,7 @@ public class FiveSpecimenAuto extends AutoActions {
                 .setTangent(Math.toRadians(270))
                 .splineToConstantHeading(new Vector2d(42, -42), Math.toRadians(180), baseVelConstraint)
                 // Straight back
-                .strafeToConstantHeading(new Vector2d(6, -42))
+                .strafeToConstantHeading(new Vector2d(8, -42))
 
 
                 // Straight forward 2
@@ -90,54 +92,52 @@ public class FiveSpecimenAuto extends AutoActions {
                 .splineToConstantHeading(new Vector2d(42, -52), Math.toRadians(180), baseVelConstraint)
 
                 // Straight back 2
-                .strafeToConstantHeading(new Vector2d(6, -52))
+                .strafeToConstantHeading(new Vector2d(8, -52))
                 // Straight forward 3
                 .strafeToConstantHeading(new Vector2d(42, -52))
                 // ( curve 3
                 .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(48, -54.5), Math.toRadians(270), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(48, -54), Math.toRadians(270), baseVelConstraint)
                 // ) curve 3
                 .setTangent(Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(42, -56.5), Math.toRadians(180), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(42, -56), Math.toRadians(180), baseVelConstraint)
 
                 // Straight back 3
-                .strafeToConstantHeading(new Vector2d(15, -56.5))
+                .strafeToConstantHeading(new Vector2d(15, -56), baseVelConstraint)
 
                 // Curve into the zone
                 .setTangent(Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(2, -36), Math.toRadians(120), IntoZoneVelConstraint)
+                .splineToConstantHeading(new Vector2d(2, -36), Math.toRadians(120), baseVelConstraint)
                 .build();
 
-        Action ToBar1Begin = drive.actionBuilder(new Pose2d(2, -36, 0))
-                .strafeToConstantHeading(new Vector2d(30, 0), maxSpeedConstraint)
-                .build();
-
-        Action ToBar1End = drive.actionBuilder(new Pose2d(30, 0, 0))
-                .splineToConstantHeading(new Vector2d(32, 2.5), 0, maxSpeedConstraint)
+        Action ToBar1 = drive.actionBuilder(new Pose2d(2, -36, 0))
+                .strafeToConstantHeading(new Vector2d(24, -4), maxSpeedConstraint, maxAccelConstraint)
+                .splineToConstantHeading(new Vector2d(32, 2.5), Math.toRadians(0), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action ToZone1 = drive.actionBuilder(new Pose2d(32, 2.5, 0))
-                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
+
         Action ToBar2 = drive.actionBuilder(new Pose2d(2, -36, 0))
-                .strafeToConstantHeading(new Vector2d(32, 4.5), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(32, 4.5), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action ToZone2 = drive.actionBuilder(new Pose2d(32, 4.5, 0))
-                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
         Action ToBar3 = drive.actionBuilder(new Pose2d(2, -36, 0))
-                .strafeToConstantHeading(new Vector2d(32, 6.6), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(32, 6.6), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action ToZone3 = drive.actionBuilder(new Pose2d(32, 6.5, 0))
-                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
         Action ToBar4 = drive.actionBuilder(new Pose2d(2, -36, 0))
-                .strafeToConstantHeading(new Vector2d(32, 8.5), maxSpeedConstraint)
+                .strafeToConstantHeading(new Vector2d(32, 8.5), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action Park = drive.actionBuilder(new Pose2d(32, 8.5, 0))
@@ -167,7 +167,7 @@ public class FiveSpecimenAuto extends AutoActions {
                     new SequentialAction(
                             // ------- 1ST HOOK ------- //
                             new ParallelAction(
-                                    ToBarAction1,
+                                    PreloadHookLine,
                                     vertLinearMotor.liftUpToChamber(),
                                     outtakeArmServo.clawArmForward()
                             ),
@@ -187,67 +187,63 @@ public class FiveSpecimenAuto extends AutoActions {
                                     vertLinearMotor.liftUpToChamber(),
                                     outtakeArmServo.clawArmForward(),
                                     outtakeTwistServo.twistToBearingsDown(),
-                                    ToBar1Begin
+                                    ToBar1
                             ),
-
-                            new ParallelAction(
-                                    ToBar1End,
-                                    vertLinearMotor.hookOnBar()
-                            ),
-
+                            vertLinearMotor.hookOnBar(),
                             new ParallelAction(
                                     ToZone1,
                                     outtakeClawServo.openClaw(),
                                     outtakeArmServo.clawArmBack(),
                                     outtakeTwistServo.twistToBearingsUp()
-                            )
-//                            outtakeClawServo.closeClaw(),
-//                            new ParallelAction(
-//                                    vertLinearMotor.liftUpToChamber(),
-//                                    outtakeArmServo.clawArmForward(),
-//                                    outtakeTwistServo.twistToBearingsDown(),
-//                                    ToBar2
-//                            ),
-//                            vertLinearMotor.hookOnBar(),
-//                            outtakeClawServo.openClaw(),
+                            ),
+                            outtakeClawServo.closeClaw(),
+                            new ParallelAction(
+                                    vertLinearMotor.liftUpToChamber(),
+                                    outtakeArmServo.clawArmForward(),
+                                    outtakeTwistServo.twistToBearingsDown(),
+                                    ToBar2
+                            ),
+                            vertLinearMotor.hookOnBar(),
+                            outtakeClawServo.openClaw(),
 
-//                            new ParallelAction(
-//                                    ToZone2,
-//                                    outtakeArmServo.clawArmBack(),
-//                                    outtakeTwistServo.twistToBearingsUp()
-//                            ),
-//                            outtakeClawServo.closeClaw(),
-//
-//                            new ParallelAction(
-//                                    vertLinearMotor.liftUpToChamber(),
-//                                    outtakeArmServo.clawArmForward(),
-//                                    outtakeTwistServo.twistToBearingsDown(),
-//                                    ToBar3
-//                            ),
-//                            vertLinearMotor.hookOnBar(),
-//                            outtakeClawServo.openClaw(),
-//
-//                            new ParallelAction(
-//                                    ToZone3,
-//                                    outtakeArmServo.clawArmBack(),
-//                                    outtakeTwistServo.twistToBearingsUp()
-//                            ),
-//                            outtakeClawServo.closeClaw(),
-//                            new ParallelAction(
-//                                    vertLinearMotor.liftUpToChamber(),
-//                                    outtakeArmServo.clawArmForward(),
-//                                    outtakeTwistServo.twistToBearingsDown(),
-//                                    ToBar4
-//                            ),
-//                            vertLinearMotor.hookOnBar(),
-//                            outtakeClawServo.openClaw(),
-//                            new ParallelAction(
-//                                    Park,
-//                                    outtakeArmServo.clawArmBack(),
-//                                    outtakeTwistServo.twistToBearingsUp()
-//                            )
+                            new ParallelAction(
+                                    ToZone2,
+                                    outtakeArmServo.clawArmBack(),
+                                    outtakeTwistServo.twistToBearingsUp()
+                            ),
+                            outtakeClawServo.closeClaw(),
+
+                            new ParallelAction(
+                                    vertLinearMotor.liftUpToChamber(),
+                                    outtakeArmServo.clawArmForward(),
+                                    outtakeTwistServo.twistToBearingsDown(),
+                                    ToBar3
+                            ),
+                            vertLinearMotor.hookOnBar(),
+                            outtakeClawServo.openClaw(),
+
+                            new ParallelAction(
+                                    ToZone3,
+                                    outtakeArmServo.clawArmBack(),
+                                    outtakeTwistServo.twistToBearingsUp()
+                            ),
+                            outtakeClawServo.closeClaw(),
+                            new ParallelAction(
+                                    vertLinearMotor.liftUpToChamber(),
+                                    outtakeArmServo.clawArmForward(),
+                                    outtakeTwistServo.twistToBearingsDown(),
+                                    ToBar4
+                            ),
+                            vertLinearMotor.hookOnBar(),
+                            outtakeClawServo.openClaw(),
+                            new ParallelAction(
+                                    Park,
+                                    outtakeArmServo.clawArmBack(),
+                                    outtakeTwistServo.twistToBearingsUp()
+                            )
                     )
             );
         }
     }
+
 }
