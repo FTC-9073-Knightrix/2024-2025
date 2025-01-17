@@ -28,8 +28,8 @@ import org.firstinspires.ftc.teamcode.autonomous.PinpointDrive;
 
 import java.util.Arrays;
 
-@Autonomous(name = "Five Specimen Auto")
-public class FiveSpecimenAuto extends AutoActions {
+@Autonomous(name = "Five Specimen Auto Comp Walls")
+public class FiveSpecimenAutoCompWalls extends AutoActions {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d beginPose = new Pose2d(0, 0, 0);
@@ -97,13 +97,13 @@ public class FiveSpecimenAuto extends AutoActions {
                 .strafeToConstantHeading(new Vector2d(42, -52))
                 // ( curve 3
                 .setTangent(Math.toRadians(0))
-                .splineToConstantHeading(new Vector2d(48, -54), Math.toRadians(270), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(48, -54.5), Math.toRadians(270), baseVelConstraint)
                 // ) curve 3
                 .setTangent(Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(42, -56), Math.toRadians(180), baseVelConstraint)
+                .splineToConstantHeading(new Vector2d(42, -57), Math.toRadians(180), baseVelConstraint) // Only changed this line for comp walls
 
                 // Straight back 3
-                .strafeToConstantHeading(new Vector2d(15, -56), baseVelConstraint)
+                .strafeToConstantHeading(new Vector2d(15, -57), baseVelConstraint) // Only changed this line for comp walls
 
                 // Curve into the zone
                 .setTangent(Math.toRadians(180))
@@ -116,26 +116,27 @@ public class FiveSpecimenAuto extends AutoActions {
                 .build();
 
         Action ToZone1 = drive.actionBuilder(new Pose2d(32, 2.5, 0))
-                .strafeToConstantHeading(new Vector2d(1.5, -36), maxSpeedConstraint, backToZoneAccelConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
-        Action ToBar2 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
+
+        Action ToBar2 = drive.actionBuilder(new Pose2d(2, -36, 0))
                 .strafeToConstantHeading(new Vector2d(32, 4.5), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action ToZone2 = drive.actionBuilder(new Pose2d(32, 4.5, 0))
-                .strafeToConstantHeading(new Vector2d(1.5, -36), maxSpeedConstraint, backToZoneAccelConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
-        Action ToBar3 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
+        Action ToBar3 = drive.actionBuilder(new Pose2d(2, -36, 0))
                 .strafeToConstantHeading(new Vector2d(32, 6.6), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 
         Action ToZone3 = drive.actionBuilder(new Pose2d(32, 6.5, 0))
-                .strafeToConstantHeading(new Vector2d(1.5, -36), maxSpeedConstraint, backToZoneAccelConstraint)
+                .strafeToConstantHeading(new Vector2d(2, -36), maxSpeedConstraint, backToZoneAccelConstraint)
                 .build();
 
-        Action ToBar4 = drive.actionBuilder(new Pose2d(1.5, -36, 0))
+        Action ToBar4 = drive.actionBuilder(new Pose2d(2, -36, 0))
                 .strafeToConstantHeading(new Vector2d(32, 8.5), maxSpeedConstraint, maxAccelConstraint)
                 .build();
 

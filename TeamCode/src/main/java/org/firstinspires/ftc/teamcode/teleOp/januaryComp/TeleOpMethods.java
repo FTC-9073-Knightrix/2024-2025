@@ -116,7 +116,8 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     final double INTAKE_TWIST_PERPENDICULAR = 0.84;
 
     final double INTAKE_ARM_DOWN = 0.85;
-    final double INTAKE_ARM_DEFAULT = 0.55;
+    final double INTAKE_ARM_DEFAULT = 0.5;
+    final double INTAKE_ARM_RETRACTED = 0.1;
     double dM  = -0.0000227924; // slope for dynamic arm movement linear equation, where x is the horiz lift position
     double dB = 0.731142; // y intercept for dynamic arm movement linear equation, where x is the horiz lift position
     double intakeArmHoverDynamic = dM * 0 + dB; // Times zero for position 0 on the slide
@@ -138,7 +139,7 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     final double OUTTAKE_ARM_TRANSFER = 0.0;
 
     final double OUTTAKE_CLAW_CLOSE = 0.25;
-    final double OUTTAKE_CLAW_LOOSE_CLOSE = 0.25;
+    final double OUTTAKE_CLAW_LOOSE_CLOSE = 0.40;
     final double OUTTAKE_CLAW_OPEN = 0.66;
 
     // THE MEANING OF BEARINGS POINTING UP AND DOWN ARE RELATIVE TO THEIR ORIENTATION WHEN THE
@@ -155,14 +156,14 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
     int liftPosHoriz = 0;
     int liftPosAdjHoriz = 0;
     double horizLinearPower = 0.0;
-    final int HORIZ_MAX = 1600;
+    final int HORIZ_MAX = 1400;
 
     // Vert Lift
     int liftPosVert = 0;
     int liftPosAdjVert = 0;
     double vertLinearPower = 0.0;
     final double stopSlideFallingPower = -0.12;
-    final int VERT_MAX = -3400;
+    final int VERT_MAX = -3650;
     final int TRANSFER_TARGET = -725;
     final int HIGH_SPECIMEN_GRAB_TARGET = -150;
     final int HOOK_TARGET = -675;
@@ -430,9 +431,13 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     specimenFSM.setJustSwitched(false);
                 }
                 if (gamepad1.right_trigger>0.5) {
-                    if (gameMode == GameMode.SAMPLE) return;
-                    specimenFSM.setState(SpecimenFSM.SpecimenState.GRAB_AND_FLIP);
-                    specimenFSM.setJustSwitched(true);
+                    if (passesExtensionLimit()) {
+                        if (gameMode == GameMode.SAMPLE) return;
+                        specimenFSM.setState(SpecimenFSM.SpecimenState.GRAB_AND_FLIP);
+                        specimenFSM.setJustSwitched(true);
+                    } else {
+                        rumbleGamePads(100, 0.5);
+                    }
                 }
                 break;
             case GRAB_AND_FLIP:
@@ -474,13 +479,16 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
                     vertLinearMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     vertLinearPower = 0.0;
 
-                    outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
-                    outtakeArmServoRot = OUTTAKE_ARM_BACK;
-                    outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
-
-                    if (specimenFSM.timer.seconds() > 1.0) {
-                        specimenFSM.setState(SpecimenFSM.SpecimenState.READY_TO_GRAB);
-                        specimenFSM.setJustSwitched(true);
+                    if (gamepad1.left_trigger > 0.5) {
+                        outtakeClawServoRot = OUTTAKE_CLAW_LOOSE_CLOSE;
+                    } else {
+                        outtakeClawServoRot = OUTTAKE_CLAW_OPEN;
+                        outtakeArmServoRot = OUTTAKE_ARM_BACK;
+                        outtakeTwistServoRot = OUTTAKE_TWIST_BEARINGS_POINTING_UP;
+                        if (specimenFSM.timer.seconds() > 1.0) {
+                            specimenFSM.setState(SpecimenFSM.SpecimenState.READY_TO_GRAB);
+                            specimenFSM.setJustSwitched(true);
+                        }
                     }
                 }
                 break;
@@ -602,6 +610,10 @@ public abstract class TeleOpMethods extends TeleOpHardwareMap {
         if (gamepad2.y && intakeArmIsHovering) {
             intakeArmServoRot = INTAKE_ARM_DEFAULT;
             intakeArmIsHovering = false;
+        }
+
+        if (gamepad2.dpad_down) {
+            intakeArmServoRot = INTAKE_ARM_RETRACTED;
         }
     }
 

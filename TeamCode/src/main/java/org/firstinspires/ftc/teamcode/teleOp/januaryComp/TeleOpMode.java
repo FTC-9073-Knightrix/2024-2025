@@ -8,12 +8,6 @@ public class TeleOpMode extends TeleOpMethods {
 
     @Override
     public void loop() {
-//        if (gamepad2.dpad_up) {
-//            outtakeClawServoRot = incrementServoRot(outtakeClawServoRot, 0.01, 0, 1);
-//        }
-//        if (gamepad2.dpad_down) {
-//            outtakeClawServoRot = incrementServoRot(outtakeClawServoRot, -0.01, 0, 1);
-//        }
         runMecanumDrive();
 
         runIntakeOuttake();

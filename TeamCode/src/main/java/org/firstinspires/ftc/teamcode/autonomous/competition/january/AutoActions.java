@@ -21,7 +21,7 @@ public abstract class AutoActions extends LinearOpMode {
     final public double clawOpenPosition = 0.66; // TODO CHANGE VALUES ACCORDINGLY
     final public double clawClosePosition = 0.25;
 
-    final public double clawArmStartPosition = 0.08;
+    final public double clawArmStartPosition = 0.06;
     final public double clawArmForwardPosition = 0.275;
     final public double clawArmBackPosition = 1.0;
 
@@ -129,6 +129,7 @@ public abstract class AutoActions extends LinearOpMode {
 
     // --------------------------------- CLAW ARM ---------------------------------
     public class OuttakeArmServo {
+
         final private Servo outtakeArmServo;
 
         public OuttakeArmServo(HardwareMap hardwareMap) {
